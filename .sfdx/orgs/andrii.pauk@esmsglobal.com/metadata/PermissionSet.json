@@ -1,0 +1,97 @@
+{
+  "status": 0,
+  "result": [
+    {
+      "createdById": "0051t000001hyGyAAI",
+      "createdByName": "Simploud Success",
+      "createdDate": "2019-09-19T14:52:38.000Z",
+      "fileName": "permissionsets/Data_Management.permissionset",
+      "fullName": "Data_Management",
+      "id": "0PS1X00000061BFWAY",
+      "lastModifiedById": "0051t000001hyGyAAI",
+      "lastModifiedByName": "Simploud Success",
+      "lastModifiedDate": "2020-04-03T13:57:16.000Z",
+      "manageableState": "unmanaged",
+      "type": "PermissionSet"
+    },
+    {
+      "createdById": "0051X000001Unf0QAC",
+      "createdByName": "Salesforce",
+      "createdDate": "2020-06-09T15:12:16.000Z",
+      "fileName": "permissionsets/Set_Audit_Permissions.permissionset",
+      "fullName": "Set_Audit_Permissions",
+      "id": "0PS1X000000PWtNWAW",
+      "lastModifiedById": "0051X000001Unf0QAC",
+      "lastModifiedByName": "Salesforce",
+      "lastModifiedDate": "2020-06-09T15:12:52.000Z",
+      "manageableState": "unmanaged",
+      "type": "PermissionSet"
+    },
+    {
+      "createdById": "0051t000001hyGyAAI",
+      "createdByName": "Simploud Success",
+      "createdDate": "2018-11-01T10:16:17.000Z",
+      "fileName": "permissionsets/Case_Feed.permissionset",
+      "fullName": "Case_Feed",
+      "id": "0PS1t000001v0tKGAQ",
+      "lastModifiedById": "0051t000001hyGyAAI",
+      "lastModifiedByName": "Simploud Success",
+      "lastModifiedDate": "2018-11-01T10:16:17.000Z",
+      "manageableState": "unmanaged",
+      "type": "PermissionSet"
+    },
+    {
+      "createdById": "0051t000001hyGyAAI",
+      "createdByName": "Simploud Success",
+      "createdDate": "2018-12-29T08:09:11.000Z",
+      "fileName": "permissionsets/Simploud__Simploud_Basic.permissionset",
+      "fullName": "Simploud__Simploud_Basic",
+      "id": "0PS1t000001oKpBGAU",
+      "lastModifiedById": "0051t000001hyGyAAI",
+      "lastModifiedByName": "Simploud Success",
+      "lastModifiedDate": "2020-05-29T02:58:59.000Z",
+      "manageableState": "installed",
+      "namespacePrefix": "Simploud",
+      "type": "PermissionSet"
+    },
+    {
+      "createdById": "0051t000001hyGyAAI",
+      "createdByName": "Simploud Success",
+      "createdDate": "2019-09-02T08:20:28.000Z",
+      "fileName": "permissionsets/Trainer_Access.permissionset",
+      "fullName": "Trainer_Access",
+      "id": "0PS1X0000005peSWAQ",
+      "lastModifiedById": "0051t000001jcgyAAA",
+      "lastModifiedByName": "Alastair Scarborough",
+      "lastModifiedDate": "2019-10-01T09:05:03.000Z",
+      "manageableState": "unmanaged",
+      "type": "PermissionSet"
+    },
+    {
+      "createdById": "0051t000001hyGyAAI",
+      "createdByName": "Simploud Success",
+      "createdDate": "2018-12-03T12:57:54.000Z",
+      "fileName": "permissionsets/Files_Connect.permissionset",
+      "fullName": "Files_Connect",
+      "id": "0PS1t000001nPSeGAM",
+      "lastModifiedById": "0051t000001jcgyAAA",
+      "lastModifiedByName": "Alastair Scarborough",
+      "lastModifiedDate": "2019-07-15T09:02:36.000Z",
+      "manageableState": "unmanaged",
+      "type": "PermissionSet"
+    },
+    {
+      "createdById": "0051t000001jXAjAAM",
+      "createdByName": "Devendra Gurung",
+      "createdDate": "2018-12-12T13:54:09.000Z",
+      "fileName": "permissionsets/Simploud_Simple.permissionset",
+      "fullName": "Simploud_Simple",
+      "id": "0PS1t000001noOBGAY",
+      "lastModifiedById": "0051t000001hyGyAAI",
+      "lastModifiedByName": "Simploud Success",
+      "lastModifiedDate": "2020-04-03T13:55:31.000Z",
+      "manageableState": "unmanaged",
+      "type": "PermissionSet"
+    }
+  ]
+}

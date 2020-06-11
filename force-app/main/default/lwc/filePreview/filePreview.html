@@ -1,0 +1,263 @@
+<template>
+  <div class="border slds-box slds-box_xx-small slds-theme_default">
+    <!-- header info -->
+    <template if:true={showControlledDocuments}>
+      <div class="my-accordion">
+        <div class="size">Controlled Document Information</div>
+      </div>
+    </template>
+    <template if:true={showTrainingMaterials}>
+      <div class="my-accordion">
+        <div class="size">Training Material Information</div>
+      </div>
+    </template> 
+
+    <!-- file info -->
+    <template if:true={showFiles}>
+      <lightning-card class="card">
+        <template if:true={files}>
+          <table class="slds-table slds-table_bordered slds-table_cell-buffer">
+            <thead>
+              <tr class="slds-text-title_caps">
+                <th scope="col">
+                  <div title="Key">File Name</div>
+                </th>
+                <th scope="col">
+                  <div title="Value">File Extension</div>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <template for:each={files} for:item="keyValue">
+                <tr key={keyValue.Id}>
+                  <th scope="col">
+                    <div>{keyValue.Title}</div>
+                  </th>
+                  <th scope="col">
+                    <div>{keyValue.FileExtension}</div>
+                  </th>
+                  <th scope="col">
+                    <lightning-button
+                      data-id={keyValue.ContentDocumentId}
+                      label="Open"
+                      variant="brand"
+                      value="file preview"
+                      onclick={redirect}
+                    ></lightning-button>
+                  </th>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </template>
+      </lightning-card>
+    </template>
+
+    <!-- contrlled document info -->
+    <template if:true={showControlledDocuments}>
+      <lightning-card title="Controlled Document" icon-name="custom:custom55">
+        <div class="slds-m-around_medium">
+          <template if:true={controlledDocuments}>
+            <table
+              class="slds-table slds-table_bordered slds-table_cell-buffer"
+            >
+              <thead>
+                <tr class="slds-text-title_caps">
+                  <th scope="col">
+                    <div title="Key">Document Type</div>
+                  </th>
+                  <th scope="col">
+                    <div title="Value">Effective Date</div>
+                  </th>
+                  <th scope="col">
+                    <div title="Value">Periodic Review Notification (days)</div>
+                  </th>
+                  <th scope="col">
+                    <div title="Value">Periodic Review Cycle (months)</div>
+                  </th>
+                  <th scope="col">
+                    <div title="Value">Internal/External</div>
+                  </th>
+                  <th scope="col">
+                    <div title="Value">
+                      TRAINING Have you added settings & quIz?
+                    </div>
+                  </th>
+                  <th scope="col">
+                    <div title="Value">Version</div>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <template for:each={controlledDocuments} for:item="doc">
+                  <tr key={doc.Id}>
+                    <th scope="col">
+                      <div>{doc.Simploud__Document_Type__c}</div>
+                    </th>
+                    <th scope="col">
+                      <div>{doc.Simploud__Effective_Date__c}</div>
+                    </th>
+                    <th scope="col">
+                      <div>
+                        {doc.Simploud__Periodic_Review_Notification_days__c}
+                      </div>
+                    </th>
+                    <th scope="col">
+                      <div>{doc.Simploud__Periodic_Review_Cycle_months__c}</div>
+                    </th>
+                    <th scope="col">
+                      <div>{doc.Internal_External__c}</div>
+                    </th>
+                    <th scope="col">
+                      <div>{doc.Have_you_added_settings_and_questions__c}</div>
+                    </th>
+                    <th scope="col">
+                      <div>{doc.Simploud__Version__c}</div>
+                    </th>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+          </template>
+        </div>
+      </lightning-card>
+    </template>
+
+    <!-- file Training Materials info -->
+    <template if:true={showTMFile}>
+      <lightning-card class="card">
+        <template if:true={trainingMaterialsFile}>
+          <table class="slds-table slds-table_bordered slds-table_cell-buffer">
+            <thead>
+              <tr class="slds-text-title_caps">
+                <th scope="col">
+                  <div title="Key">File Name</div>
+                </th>
+                <th scope="col">
+                  <div title="Value">File Extension</div>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <template for:each={trainingMaterialsFile} for:item="tmf">
+                <tr key={tmf.Id}>
+                  <th scope="col">
+                    <div>{tmf.Title}</div>
+                  </th>
+                  <th scope="col">
+                    <div>{tmf.FileExtension}</div>
+                  </th>
+                  <th scope="col">
+                    <lightning-button
+                      data-id={tmf.ContentDocumentId}
+                      label="Open"
+                      variant="brand"
+                      value="file preview"
+                      onclick={filePreview}
+                    ></lightning-button>
+                  </th>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </template>
+      </lightning-card>
+    </template>
+    <!-- Training Materials info -->
+    <template if:true={showTrainingMaterials}>
+      <lightning-card title="Training Materials" icon-name="custom:custom84">
+        <div class="slds-m-around_medium">
+          <template if:true={trainingMaterials}>
+            <table
+              class="slds-table slds-table_bordered slds-table_cell-buffer"
+            >
+              <thead>
+                <tr class="slds-text-title_caps">
+                  <th scope="col">
+                    <div title="Key">Location</div>
+                  </th>
+                  <th scope="col">
+                    <div title="Value">Training Content List</div>
+                  </th>
+                  <th scope="col">
+                    <div title="Value">Type</div>
+                  </th>
+                  <th scope="col">
+                    <div title="Value">Course length (hours)</div>
+                  </th>
+                  <th scope="col">
+                    <div title="Value">Stream</div>
+                  </th>
+                  <th scope="col">
+                    <div title="Value">Date Closed</div>
+                  </th>
+                  <th scope="col">
+                    <div title="Value">
+                      Did you check all modules are EFFECTIVE?
+                    </div>
+                  </th>
+                  <th scope="col">
+                    <div title="Value">Category</div>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <template for:each={trainingMaterials} for:item="tm">
+                  <tr key={tm.Id}>
+                    <th scope="col">
+                      <div>{tm.Simploud__Location__c}</div>
+                    </th>
+                    <th scope="col">
+                      <lightning-formatted-rich-text
+                        value={tm.Training_Content_List__c}
+                      >
+                      </lightning-formatted-rich-text>
+                    </th>
+                    <th scope="col">
+                      <div>{tm.Simploud__Type__c}</div>
+                    </th>
+                    <th scope="col">
+                      <!-- <div>{tm.Course_length_hours__c}</div> -->
+                      <!-- <lightning-formatted-time value={tm.Course_length_hours__c}
+                        >
+                        </lightning-formatted-time> -->
+                      <!-- <div>{tm.Course_length_hours__c}</div> -->
+                      <lightning-formatted-date-time
+                        value={tm.Course_length_hours__c}
+                        hour="2-digit"
+                        minute="2-digit"
+                        time-zone-name="short"
+                        time-zone="UTC"
+                      >
+                      </lightning-formatted-date-time>
+                    </th>
+                    <th scope="col">
+                      <div>{tm.Stream__c}</div>
+                    </th>
+                    <th scope="col">
+                      <lightning-formatted-date-time
+                        value={tm.Simploud__Date_Closed__c}
+                        year="numeric"
+                        month="numeric"
+                        day="numeric"
+                        time-zone-name="short"
+                        time-zone="UTC"
+                      >
+                      </lightning-formatted-date-time>
+                    </th>
+                    <th scope="col">
+                      <div>{tm.Did_you_check_all_modules_are_EFFECTIVE__c}</div>
+                    </th>
+                    <th scope="col">
+                      <div>{tm.Category__c}</div>
+                    </th>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+          </template>
+        </div>
+      </lightning-card>
+    </template>
+  </div>
+</template>

@@ -1,0 +1,28 @@
+ .my-accordion{
+    background-color: rgb(112, 110, 107);
+    min-width: 0;
+    pointer-events: none;
+    color: white;
+    font-size: 1.75rem;
+    font-weight: 300;
+    line-height: 1.6;
+   
+  } 
+  .slds-theme--info{
+    color: rgb(255, 255, 255);
+    background-color: rgb(112, 110, 107);
+}
+.slds-box{
+    padding: 0.4em;
+    border-radius: 0.25rem;
+    border: 1px solid rgb(221, 219, 218);
+}
+.border{
+    border-radius: 0.25rem;
+  
+}
+.size{
+  /*border: 10px; */
+    margin-left: 163px;
+}
+

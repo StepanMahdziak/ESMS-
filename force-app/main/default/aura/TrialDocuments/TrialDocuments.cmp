@@ -1,0 +1,24 @@
+<aura:component controller="TrialDocumentsApexController" access="global" implements="flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId,force:hasSObjectName">
+    <aura:attribute name="docList" type="List" />
+    <aura:attribute name="filteredDocList" type="List" />
+    <aura:attribute name="showList" type="boolean" default="false" />
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <aura:if isTrue="{!v.showList}">
+         <aura:if isTrue="{!v.filteredDocList != null}">
+             <div class="slds-box">
+                 <lightning:input type="search" label="Filter Documents:" name="FilterByDoc" placeholder="Type any part of document name or type" onchange="{!c.filterRecords}"/>
+               <div class="slds-grid slds-wrap slds-gutters">
+                     <aura:iteration items="{!v.filteredDocList}" var="doc_i" >                           
+                         <div class="slds-col">
+                             <lightning:fileCard fileId="{!doc_i.contentId}"  description="{!doc_i.fileTitle + '/' + doc_i.documentType}"/>
+                             <a href="{!doc_i.fileLink}" target="_blank">
+                                 {!doc_i.documentTitle + '/' + doc_i.documentType}
+                             </a>  
+                         </div>        
+                     </aura:iteration>
+                 </div>
+             </div>
+             
+        </aura:if>
+    </aura:if>
+</aura:component>
