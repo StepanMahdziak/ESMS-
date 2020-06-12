@@ -46,40 +46,17 @@ public with sharing class MetadataUpdateQueuebale implements Queueable, Database
 
 
     public void execute(QueueableContext context) {
-        
         for(Simploud__Controlled_Document__c cdObj:cdObjs.values()) {
-
             recordId = cdObj.Id;
-            isProgress = true;
-            try{
-                Id cdId = [SELECT ContentDocumentId,LinkedEntityId FROM ContentDocumentLink WHERE LinkedEntityId = :recordId].ContentDocumentId;
-                cv = [SELECT Title, FileExtension,ExternalDocumentInfo1, ContentDocumentId FROM ContentVersion WHERE ContentDocumentId = :cdId];
-            }catch(Exception e) {
-                if(e.getMessage().contains('List has no rows'))
-                {
-                    return;
-                }
-            }
-            //  if ( cdObj.Simploud__Status__c != 'Draft'  ){
-               
+        }
+        Id cdId = [SELECT ContentDocumentId,LinkedEntityId FROM ContentDocumentLink WHERE LinkedEntityId = :recordId].ContentDocumentId;
+        cv = [SELECT Title, FileExtension,ExternalDocumentInfo1, ContentDocumentId FROM ContentVersion WHERE ContentDocumentId = :cdId];
+        for(Simploud__Controlled_Document__c cdObj:cdObjs.values()) {
             setCustomMetadata();
             defineDocType(cv);
-           // if ( cdObj.Simploud__Status__c == 'Obsolete' ) {
-              //  docType = 'Locked%20Documents';
-              
-           // }
-            // if (cdObj.Simploud__Status__c == 'Effective' && cdOld.get(cdObj.Id).Simploud__Status__c == 'Obsolete' ) {
-            //     docType = 'Locked%20Documents';
-            // }
-
             if(cdObj.Simploud__Status__c == 'Effective' ||  cdObj.Simploud__Status__c == 'Obsolete') {
                 docType = 'Locked%20Documents';
             }
-           // if(cdObj.Simploud__Status__c == 'Obsolete' && cdObj.CheckDockType__c == false) {
-              //  docType = 'Controlled%20Documents';
-            //}
-
-
             if (cdObj.Simploud__Status__c == 'Cancelled') {
                 if (
                     versionNum != null &&
@@ -91,78 +68,74 @@ public with sharing class MetadataUpdateQueuebale implements Queueable, Database
                     defineDocType(cv);
                 }
             }
-            
             setFolder();
-            if(!Test.isRunningTest()){
-            getMetadata(cv);
-            getMetadataURI(cv);
-            getMetadataWithFields(cv);
-            cv.Title=cdObj.Name+' v'+Integer.valueof(cdObj.Record_Version__c)+' '+cdObj.Simploud__Status__c;
+            if(!Test.isRunningTest()) {
+                getMetadata(cv);
+                getMetadataURI(cv);
+                getMetadataWithFields(cv);
+                cv.Title=cdObj.Name+' v'+Integer.valueof(cdObj.Record_Version__c)+' '+cdObj.Simploud__Status__c;
 
-            fileCheckOut(cv);
-            if (docType == 'Locked%20Documents') {
-                metadataPOSTLockedDocument();
-                fileCheckIn(cv);
-                String newTitle = cdObj.Name+' v'+Integer.valueof(cdObj.Record_Version__c)+' '+cdObj.Simploud__Status__c;
-                metadataRenameFile(newTitle);
+                fileCheckOut(cv);
+                if (docType == 'Locked%20Documents') {
+                    metadataPOSTLockedDocument();
+                    fileCheckIn(cv);
+                    String newTitle = cdObj.Name+' v'+Integer.valueof(cdObj.Record_Version__c)+' '+cdObj.Simploud__Status__c;
+                    metadataRenameFile(newTitle);
 
-            } if (docType == 'Controlled%20Documents') {
-                metadataPOSTControlledDocument();
-                fileCheckIn(cv);
-                String newTitle = cdObj.Name+' v'+Integer.valueof(cdObj.Record_Version__c)+' '+cdObj.Simploud__Status__c;
-                metadataRenameFile(newTitle);
-            } if (docType == 'General%20Documents') {
-                metadataPOSTGeneralDocument();
-                fileCheckIn(cv);
+                } if (docType == 'Controlled%20Documents') {
+                    metadataPOSTControlledDocument();
+                    fileCheckIn(cv);
+                    String newTitle = cdObj.Name+' v'+Integer.valueof(cdObj.Record_Version__c)+' '+cdObj.Simploud__Status__c;
+                    metadataRenameFile(newTitle);
+                } if (docType == 'General%20Documents') {
+                    metadataPOSTGeneralDocument();
+                    fileCheckIn(cv);
+                }
+                cv.Title=cdObj.Name+' v'+Integer.valueof(cdObj.Record_Version__c)+' '+cdObj.Simploud__Status__c;
+                if(cv.FileExtension == 'pdf') {
+                    if(docType == 'Controlled%20Documents') {
+                        if(metWrapper.sitePath == '/sites/edmsclientdocs/') {
+                            String encodedFolderName = EncodingUtil.urlEncode(metWrapper.controlledDocsFolder,'UTF-8').replace('+','%20');
+                            String encodedTitle = EncodingUtil.urlEncode(cv.Title,'UTF-8').replace('+','%20');
+                            String sitePath = EncodingUtil.urlEncode(metWrapper.sitePath,'UTF-8' );
+                            cv.ExternalDocumentInfo1 ='https://medtoxdataline.sharepoint.com/'+sitePath+encodedFolderName+'/Forms/AllItems.aspx?id='+sitePath+encodedFolderName+'%2F'+encodedTitle+'.pdf&parent='+encodedFolderName;
+                            update cv;
+                        }else{
+                            String folderName = 'DrafttoDraftApprovalDocuments';
+                            String encodedUrl = EncodingUtil.urlEncode(externalFilePath,'UTF-8').replace('+','%20');
+                            cv.ExternalDocumentInfo1 = 'https://medtoxdataline.sharepoint.com'+metWrapper.sitePath+folderName+'/Forms/AllItems.aspx?viewpath='+EncodingUtil.urlEncode(metWrapper.sitePath,'UTF-8' )+folderName+'&id='+EncodingUtil.urlEncode(metWrapper.sitePath,'UTF-8' )+folderName+'%2F'+EncodingUtil.urlEncode(cv.Title,'UTF-8').replace('+','%20')+'.pdf&parent='+EncodingUtil.urlEncode(metWrapper.sitePath,'UTF-8' )+folderName;
+                            update cv;
+                        }
+                    }
+                    if(docType == 'Locked%20Documents') {
+                        if(metWrapper.sitePath == '/sites/edmsclientdocs/') {
+                            String encodedFolderName2 = EncodingUtil.urlEncode(metWrapper.lockedDocsFolder,'UTF-8').replace('+','%20');
+                            String encodedTitle2 = EncodingUtil.urlEncode(cv.Title,'UTF-8').replace('+','%20');
+                            String sitePath = EncodingUtil.urlEncode(metWrapper.sitePath,'UTF-8' ).replace('+','%20');
+                            cv.ExternalDocumentInfo1 ='https://medtoxdataline.sharepoint.com/'+sitePath+encodedFolderName2+'/Forms/AllItems.aspx?id='+sitePath+encodedFolderName2+'%2F'+encodedTitle2+'.pdf&parent='+encodedFolderName2;
+                            update cv;
+                        }else{
+                            String folderName = 'ApprovedtoObsoleteDocuments';
+                            String encodedUrl = EncodingUtil.urlEncode(externalFilePath,'UTF-8').replace('+','%20');
+                            cv.ExternalDocumentInfo1 = 'https://medtoxdataline.sharepoint.com'+metWrapper.sitePath+folderName+'/Forms/AllItems.aspx?viewpath='+EncodingUtil.urlEncode(metWrapper.sitePath,'UTF-8' )+folderName+'&id='+EncodingUtil.urlEncode(metWrapper.sitePath,'UTF-8' )+folderName+'%2F'+EncodingUtil.urlEncode(cv.Title,'UTF-8').replace('+','%20')+'.pdf&parent='+EncodingUtil.urlEncode(metWrapper.sitePath,'UTF-8' )+folderName;
+                            update cv;
+                        }
+                    }
+                }
 
-            }
-            cv.Title=cdObj.Name+' v'+Integer.valueof(cdObj.Record_Version__c)+' '+cdObj.Simploud__Status__c;
-
-            if(cv.FileExtension == 'pdf'){
-                if(docType == 'Controlled%20Documents'){
-                     if(metWrapper.sitePath == '/sites/edmsclientdocs/'){
-                    String encodedFolderName = EncodingUtil.urlEncode(metWrapper.controlledDocsFolder,'UTF-8').replace('+','%20'); 
-                    String encodedTitle = EncodingUtil.urlEncode(cv.Title,'UTF-8').replace('+','%20');
-                    String sitePath = EncodingUtil.urlEncode(metWrapper.sitePath,'UTF-8' );
-                    cv.ExternalDocumentInfo1 ='https://medtoxdataline.sharepoint.com/'+sitePath+encodedFolderName+'/Forms/AllItems.aspx?id='+sitePath+encodedFolderName+'%2F'+encodedTitle+'.pdf&parent='+encodedFolderName;
+                if(cdObj.Simploud__Status__c == 'Approved' && cv.FileExtension != 'pdf' ) {
+                    cv.ExternalDocumentInfo1 = cv.ExternalDocumentInfo1.replace('edit', 'view');
                     update cv;
-                     }else{
-                        String folderName = 'DrafttoDraftApprovalDocuments';
-                        String encodedUrl = EncodingUtil.urlEncode(externalFilePath,'UTF-8').replace('+','%20');
-                        cv.ExternalDocumentInfo1 = 'https://medtoxdataline.sharepoint.com'+metWrapper.sitePath+folderName+'/Forms/AllItems.aspx?viewpath='+EncodingUtil.urlEncode(metWrapper.sitePath,'UTF-8' )+folderName+'&id='+EncodingUtil.urlEncode(metWrapper.sitePath,'UTF-8' )+folderName+'%2F'+EncodingUtil.urlEncode(cv.Title,'UTF-8').replace('+','%20')+'.pdf&parent='+EncodingUtil.urlEncode(metWrapper.sitePath,'UTF-8' )+folderName;
-                        update cv;
-                    }
                 }
-                if(docType == 'Locked%20Documents'){
-                    if(metWrapper.sitePath == '/sites/edmsclientdocs/'){
-                    String encodedFolderName2 = EncodingUtil.urlEncode(metWrapper.lockedDocsFolder,'UTF-8').replace('+','%20'); 
-                    String encodedTitle2 = EncodingUtil.urlEncode(cv.Title,'UTF-8').replace('+','%20');
-                    String sitePath = EncodingUtil.urlEncode(metWrapper.sitePath,'UTF-8' ).replace('+','%20');
-                    cv.ExternalDocumentInfo1 ='https://medtoxdataline.sharepoint.com/'+sitePath+encodedFolderName2+'/Forms/AllItems.aspx?id='+sitePath+encodedFolderName2+'%2F'+encodedTitle2+'.pdf&parent='+encodedFolderName2;
-                    update cv; 
-                    }else{
-                        String folderName = 'ApprovedtoObsoleteDocuments';
-                        String encodedUrl = EncodingUtil.urlEncode(externalFilePath,'UTF-8').replace('+','%20');
-                        cv.ExternalDocumentInfo1 = 'https://medtoxdataline.sharepoint.com'+metWrapper.sitePath+folderName+'/Forms/AllItems.aspx?viewpath='+EncodingUtil.urlEncode(metWrapper.sitePath,'UTF-8' )+folderName+'&id='+EncodingUtil.urlEncode(metWrapper.sitePath,'UTF-8' )+folderName+'%2F'+EncodingUtil.urlEncode(cv.Title,'UTF-8').replace('+','%20')+'.pdf&parent='+EncodingUtil.urlEncode(metWrapper.sitePath,'UTF-8' )+folderName;
-                        update cv;
-                    }
+                else
+                    update cv;
+                //   }
+                if(cdObj.Simploud__Status__c =='Approved') {
+                    System.enqueueJob(new SharePointLockedFolderControlQueueable(cdObj));
                 }
-            }
-                   
-            if(cdObj.Simploud__Status__c == 'Approved' && cv.FileExtension != 'pdf' ) {
-                cv.ExternalDocumentInfo1 = cv.ExternalDocumentInfo1.replace('edit', 'view');
-                update cv;
-            }
-            else
-                update cv;
-            //   }
-            isProgress = false;
-            if(cdObj.Simploud__Status__c =='Approved'){
-                System.enqueueJob(new SharePointLockedFolderControlQueueable(cdObj));
             }
         }
-       }      
-    
+
     }
 
     public void defineDocType(ContentVersion cv) {
@@ -212,23 +185,16 @@ public with sharing class MetadataUpdateQueuebale implements Queueable, Database
             '.' +
             cv.FileExtension +
             '\')';
-            
         request.setEndpoint('callout:' + metWrapper.authProvider + url);
-        //try{
         Http http = new Http();
         HttpResponse response = http.send(request);
         if (response.getStatusCode() == 200) {
             path = fileWrapper.getURL(response.getBody());
         }
-        //  }catch(Exception e){
-        //    if(e.getMessage().contains('Attempt to de-reference a null object')){
-        //           return;
-        //       }
-        //   }
         return response;
     }
 
-   
+
 
     public void getMetadataURI(ContentVersion cv) {
         HttpRequest request = new HttpRequest();
@@ -251,7 +217,7 @@ public with sharing class MetadataUpdateQueuebale implements Queueable, Database
         serverRedirectedEmbedUri = fileWrapper.getServerRedirectedEmbedUri(response.getBody());
         uri = fileWrapper.getURI(response.getBody());
         type = fileWrapper.getType(response.getBody());
-       
+
     }
 
     public void fileCheckOut(ContentVersion cv) {
@@ -350,16 +316,16 @@ public with sharing class MetadataUpdateQueuebale implements Queueable, Database
                             json+='"'+mapFieldsFromSharePoint.get(key)+'":"'+ob.getSObject(fieldsMap.get(key).split('\\.')[0]).getSObject(fieldsMap.get(key).split('\\.')[1]).get(fieldsMap.get(key).split('\\.')[2])+'",';
                         }else {
                             json+='"'+mapFieldsFromSharePoint.get(key)+'":"'+ob.getSObject('Owner').get('Name')+'",';
-                        }   
+                        }
                     }
                 }
 
                 if(fieldsMap.get(key).contains('__r')) {
                     try{
-                        if(fieldsMap.get(key).split('\\.').size() == 5){
-                          json+='"'+mapFieldsFromSharePoint.get(key)+'":"'+ob.getSObject(fieldsMap.get(key).split('\\.')[0]).getSObject(fieldsMap.get(key).split('\\.')[1]).getSObject(fieldsMap.get(key).split('\\.')[2]).getSObject(fieldsMap.get(key).split('\\.')[3]).get(fieldsMap.get(key).split('\\.')[4])+'",';
-    
-                      }
+                        if(fieldsMap.get(key).split('\\.').size() == 5) {
+                            json+='"'+mapFieldsFromSharePoint.get(key)+'":"'+ob.getSObject(fieldsMap.get(key).split('\\.')[0]).getSObject(fieldsMap.get(key).split('\\.')[1]).getSObject(fieldsMap.get(key).split('\\.')[2]).getSObject(fieldsMap.get(key).split('\\.')[3]).get(fieldsMap.get(key).split('\\.')[4])+'",';
+
+                        }
                         if(fieldsMap.get(key).split('\\.')[1].contains('__r')) {
                             json+='"'+mapFieldsFromSharePoint.get(key)+'":"'+ob.getSObject(fieldsMap.get(key).split('\\.')[0]).getSObject(fieldsMap.get(key).split('\\.')[1]).get(fieldsMap.get(key).split('\\.')[2])+'",';
 
@@ -372,14 +338,9 @@ public with sharing class MetadataUpdateQueuebale implements Queueable, Database
                             json+='"'+mapFieldsFromSharePoint.get(key)+'":"Not specified",';
                     }
 
-                // } if(!fieldsMap.get(key).contains('__r')) {
                 } if(!fieldsMap.get(key).contains('.')) {
                     json+='"'+mapFieldsFromSharePoint.get(key)+'":"'+ob.get(fieldsMap.get(key))+'",';
                 }
-                // if(cdObj.Simploud__Status__c == 'Draft Approval'){
-                //     Simploud__Controlled_Document__History lsHistory = [SELECT ParentId , CreatedDate FROM Simploud__Controlled_Document__History WHERE ParentId =:recordId ];
-                //     json+='"SF Approved Date":"'+lsHistory.CreatedDate+'",';
-                // }
 
             }
 
