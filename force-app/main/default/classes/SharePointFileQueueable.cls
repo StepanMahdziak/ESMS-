@@ -40,7 +40,7 @@ public with sharing class SharePointFileQueueable implements Queueable,Database.
                 if(cv.ExternalDataSourceId == null && cv.ExternalDocumentInfo1 == null && cv.ExternalDocumentInfo2 == null) {
                     setCustomMetadata();
                     defineDocType(cv);
-                    if ( docType == 'Controlled%20Documents'  ||  docType=='General%20Documents' ) {
+                    if ( docType == Constants.CONTROLLED_DOC_TYPE ||  docType == Constants.GENERAL_DOC_TYPE ) {
                         if(!Test.isRunningTest()) {
                         UploadFileToSharePoint(cv);
                         getMetadata(cv);
@@ -48,10 +48,10 @@ public with sharing class SharePointFileQueueable implements Queueable,Database.
                         getMetadataURI(cv);
                         getFieldsFromCustomMetadata();
                         fileCheckOut(cv);
-                        if(docType =='Controlled%20Documents') {
+                        if(docType == Constants.CONTROLLED_DOC_TYPE) {
                             metadataPOSTControlledDocument();
 
-                        } if(docType =='General%20Documents') {
+                        } if(docType == Constants.GENERAL_DOC_TYPE) {
                             metadataPOSTGeneralDocument();
 
                         }
@@ -95,15 +95,15 @@ public with sharing class SharePointFileQueueable implements Queueable,Database.
                 docType = entityType.replace(' ','%20');
                 LinkedEntity = obl.LinkedEntityId;
             }
-            if(docType == 'Controlled%20Documents') {
+            if(docType == Constants.CONTROLLED_DOC_TYPE) {
                 folder = metWrapper.controlledDocsFolder.replace(' ','%20');
                 fields = metWrapper.controlledDocField;
             }
-            if(docType == 'General%20Documents') {
+            if(docType == Constants.GENERAL_DOC_TYPE) {
                 folder = metWrapper.generalDocsFolder.replace(' ','%20');
                 fields = metWrapper.generalDocField;
             }
-            if(docType =='Locked%20Documents') {
+            if(docType == Constants.LOCKED_DOC_TYPE) {
                 folder = metWrapper.lockedDocsFolder.replace(' ','%20');
                 fields = metWrapper.lockedDocField;
             }
@@ -196,12 +196,12 @@ public with sharing class SharePointFileQueueable implements Queueable,Database.
             query2+=field+', ';
         }
         SObject ob;
-        if(docType =='General%20Documents') {
+        if(docType == Constants.GENERAL_DOC_TYPE) {
             query2+='Id FROM Simploud__General_Document__c WHERE Id=:LinkedEntity';
             ob =(Simploud__General_Document__c) Database.query(query2);
 
         }
-        if (docType =='Controlled%20Documents' || docType =='Locked%20Documents') {
+        if (docType == Constants.CONTROLLED_DOC_TYPE || docType == Constants.LOCKED_DOC_TYPE) {
             query+='Id FROM Simploud__Controlled_Document__c WHERE Id=:LinkedEntity';
             ob =(Simploud__Controlled_Document__c) Database.query(query);
         }
@@ -226,8 +226,8 @@ public with sharing class SharePointFileQueueable implements Queueable,Database.
 
                 if(!fieldsMap.get(key).contains('__r')) {
                     if(fieldsMap.get(key).contains('.')) {
-                        if(fieldsMap.get(key).split('\\.').size() == 3) {
-                            json+='"'+mapFieldsFromSharePoint.get(key)+'":"'+ob.getSObject(fieldsMap.get(key).split('\\.')[0]).getSObject(fieldsMap.get(key).split('\\.')[1]).get(fieldsMap.get(key).split('\\.')[2])+'",';
+                        if(fieldsMap.get(key).split(Constants.SPLIT_BY_DOT).size() == 3) {
+                            json+='"'+mapFieldsFromSharePoint.get(key)+'":"'+ob.getSObject(fieldsMap.get(key).split(Constants.SPLIT_BY_DOT)[0]).getSObject(fieldsMap.get(key).split(Constants.SPLIT_BY_DOT)[1]).get(fieldsMap.get(key).split(Constants.SPLIT_BY_DOT)[2])+'",';
                         }else {
                             json+='"'+mapFieldsFromSharePoint.get(key)+'":"'+ob.getSObject('Owner').get('Name')+'",';
                         }
@@ -236,15 +236,15 @@ public with sharing class SharePointFileQueueable implements Queueable,Database.
                 }
                 if(fieldsMap.get(key).contains('__r')) {
                     try{
-                        if(fieldsMap.get(key).split('\\.').size() == 5) {
-                            json+='"'+mapFieldsFromSharePoint.get(key)+'":"'+ob.getSObject(fieldsMap.get(key).split('\\.')[0]).getSObject(fieldsMap.get(key).split('\\.')[1]).getSObject(fieldsMap.get(key).split('\\.')[2]).getSObject(fieldsMap.get(key).split('\\.')[3]).get(fieldsMap.get(key).split('\\.')[4])+'",';
+                        if(fieldsMap.get(key).split(Constants.SPLIT_BY_DOT).size() == 5) {
+                            json+='"'+mapFieldsFromSharePoint.get(key)+'":"'+ob.getSObject(fieldsMap.get(key).split(Constants.SPLIT_BY_DOT)[0]).getSObject(fieldsMap.get(key).split(Constants.SPLIT_BY_DOT)[1]).getSObject(fieldsMap.get(key).split(Constants.SPLIT_BY_DOT)[2]).getSObject(fieldsMap.get(key).split(Constants.SPLIT_BY_DOT)[3]).get(fieldsMap.get(key).split(Constants.SPLIT_BY_DOT)[4])+'",';
 
                         }
-                        if(fieldsMap.get(key).split('\\.')[1].contains('__r')) {
-                            json+='"'+mapFieldsFromSharePoint.get(key)+'":"'+ob.getSObject(fieldsMap.get(key).split('\\.')[0]).getSObject(fieldsMap.get(key).split('\\.')[1]).get(fieldsMap.get(key).split('\\.')[2])+'",';
+                        if(fieldsMap.get(key).split(Constants.SPLIT_BY_DOT)[1].contains('__r')) {
+                            json+='"'+mapFieldsFromSharePoint.get(key)+'":"'+ob.getSObject(fieldsMap.get(key).split(Constants.SPLIT_BY_DOT)[0]).getSObject(fieldsMap.get(key).split(Constants.SPLIT_BY_DOT)[1]).get(fieldsMap.get(key).split(Constants.SPLIT_BY_DOT)[2])+'",';
 
-                        } if(!fieldsMap.get(key).split('\\.')[1].contains('__r')) {
-                            json+='"'+mapFieldsFromSharePoint.get(key)+'":"'+ob.getSObject(fieldsMap.get(key).split('\\.')[0]).get(fieldsMap.get(key).split('\\.')[1])+'",';
+                        } if(!fieldsMap.get(key).split(Constants.SPLIT_BY_DOT)[1].contains('__r')) {
+                            json+='"'+mapFieldsFromSharePoint.get(key)+'":"'+ob.getSObject(fieldsMap.get(key).split(Constants.SPLIT_BY_DOT)[0]).get(fieldsMap.get(key).split(Constants.SPLIT_BY_DOT)[1])+'",';
                         }
                     }
                     catch(Exception e) {
@@ -319,40 +319,33 @@ public with sharing class SharePointFileQueueable implements Queueable,Database.
 
 
     public void CreateExternalCV(ContentVersion cv){
+        String sharePointURL = metWrapper.sharePointUrl;
         ContentVersion newExternalFile = new ContentVersion();
         newExternalFile.ExternalDataSourceId = [SELECT Id FROM ExternalDataSource WHERE DeveloperName = 'ESMS_SharePoint_via_Azure' LIMIT 1].Id;
-        if(docType == 'Controlled%20Documents') {
+        if(docType == Constants.CONTROLLED_DOC_TYPE) {
             if(cv.FileExtension == 'pdf') { 
                 if(metWrapper.sitePath == '/sites/edmsclientdocs/'){
-                //newExternalFile.ExternalDocumentInfo1 = serverRedirectedEmbedUri.replace('"','');
-                String externalFile = serverRedirectedEmbedUri.replace('"','');
-                String resul = externalFile.substringBefore('?');
                 String encodedUrl = EncodingUtil.urlEncode(externalFilePath,'UTF-8').replace('+','%20');
                 String encodeDockType =  EncodingUtil.urlEncode(metWrapper.controlledDocsFolder,'UTF-8').replace('+','%20');
                 String encodedSitePath = EncodingUtil.urlEncode(metWrapper.sitePath,'UTF-8' );
-                newExternalFile.ExternalDocumentInfo1 = 'https://medtoxdataline.sharepoint.com/'+encodedSitePath+encodeDockType+'/Forms/AllItems.aspx'+'?id='+encodedUrl+'&parent='+encodeDockType;
-                newExternalFile.ExternalDocumentInfo2 = 'item:L3NpdGVzL2VkbXNjbGllbnRkb2Nz:6f4ce06a-eob6-4a22-8710-c3e42f39bfd4:'+guid.replace('"','')+':'+id;
+                newExternalFile.ExternalDocumentInfo1 = sharePointURL+encodedSitePath+encodeDockType+'/Forms/AllItems.aspx'+'?id='+encodedUrl+'&parent='+encodeDockType;
                 }else {
                     String sitePath = metWrapper.sitePath;
                     String encodedSitePath = EncodingUtil.urlEncode(metWrapper.sitePath,'UTF-8' );
                     String folderName = 'DrafttoDraftApprovalDocuments';
                     String encodedUrl = EncodingUtil.urlEncode(externalFilePath,'UTF-8').replace('+','%20');
-                    String encodeDockType =  EncodingUtil.urlEncode(metWrapper.controlledDocsFolder,'UTF-8').replace('+','%20');
                     newExternalFile.ExternalDocumentInfo1 = 'https://medtoxdataline.sharepoint.com'+sitePath+folderName+'/Forms/AllItems.aspx'+'?viewpath='+encodedSitePath+'%2F'+folderName+'&id='+encodedUrl+'&parent='+encodedSitePath+'%2F'+folderName;
-                    newExternalFile.ExternalDocumentInfo2 = 'item:L3NpdGVzL2VkbXNjbGllbnRkb2Nz:6f4ce06a-eob6-4a22-8710-c3e42f39bfd4:'+guid.replace('"','')+':'+id;
 
                 }
             } if(cv.FileExtension != 'pdf') {
                 newExternalFile.ExternalDocumentInfo1 = serverRedirectedEmbedUri.replace('"','').replace('interactivepreview', 'edit');
-                newExternalFile.ExternalDocumentInfo2 = 'item:L3NpdGVzL2VkbXNjbGllbnRkb2Nz:6f4ce06a-eob6-4a22-8710-c3e42f39bfd4:'+guid.replace('"','')+':'+id;
             }
 
         }
         else {
             newExternalFile.ExternalDocumentInfo1 = serverRedirectedEmbedUri.replace('"','');
-            newExternalFile.ExternalDocumentInfo2 = 'item:L3NpdGVzL2VkbXNjbGllbnRkb2Nz:6f4ce06a-eob6-4a22-8710-c3e42f39bfd4:'+guid.replace('"','')+':'+id;
         }
-
+        newExternalFile.ExternalDocumentInfo2 = Constants.EXTERNAL_DOC_INFO_ID+guid.replace('"','')+':'+id;
         newExternalFile.ContentLocation = 'E';
         newExternalFile.Title = cv.Title;
         newExternalFile.PathOnClient = cv.Title+'.'+ cv.FileExtension;
@@ -372,7 +365,7 @@ public with sharing class SharePointFileQueueable implements Queueable,Database.
     public void setCustomMetadata(){
         String lockedFolder,controlledFolder,generalFolder;
         String controlledField, generalField, lockedField;
-        SharePoint_API_Info__mdt info = [SELECT Auth_Provider__c,Site_Path__c FROM SharePoint_API_Info__mdt WHERE DeveloperName='Integration_settings' LIMIT 1];
+        SharePoint_API_Info__mdt info = [SELECT Auth_Provider__c,Site_Path__c,SharePoint_URL__c FROM SharePoint_API_Info__mdt WHERE DeveloperName='Integration_settings' LIMIT 1];
         List<SharePointSettings__mdt> sett=[SELECT DeveloperName,Folder_Title__c,Fields__c FROM SharePointSettings__mdt LIMIT 3];
         for(SharePointSettings__mdt item:sett)
         {
@@ -391,6 +384,7 @@ public with sharing class SharePointFileQueueable implements Queueable,Database.
             metWrapper = new CustomMetadataWrapper(
                 info.Auth_Provider__c,
                 info.Site_Path__c,
+                info.SharePoint_URL__c,
                 controlledFolder,
                 generalFolder,
                 lockedFolder,

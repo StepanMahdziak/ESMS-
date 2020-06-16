@@ -395,7 +395,7 @@ public with sharing class SharePointVersionControlQueueable implements Queueable
     public void setCustomMetadata(){
         String lockedFolder,controlledFolder,generalFolder;
         String controlledField, generalField, lockedField;
-        SharePoint_API_Info__mdt info = [SELECT Auth_Provider__c,Site_Path__c FROM SharePoint_API_Info__mdt WHERE DeveloperName='Integration_settings' LIMIT 1];
+        SharePoint_API_Info__mdt info = [SELECT Auth_Provider__c,Site_Path__c,SharePoint_URL__c FROM SharePoint_API_Info__mdt WHERE DeveloperName='Integration_settings' LIMIT 1];
         List<SharePointSettings__mdt> sett = [SELECT DeveloperName,Folder_Title__c,Fields__c FROM SharePointSettings__mdt LIMIT 3];
         for(SharePointSettings__mdt item:sett)
         {
@@ -407,7 +407,7 @@ public with sharing class SharePointVersionControlQueueable implements Queueable
                 lockedField = item.Fields__c;
 
         }
-        metWrapper = new CustomMetadataWrapper(info.Auth_Provider__c,info.Site_Path__c,controlledFolder,generalFolder,lockedFolder,controlledField, generalField, lockedField);
+        metWrapper = new CustomMetadataWrapper(info.Auth_Provider__c,info.Site_Path__c,info.SharePoint_URL__c,controlledFolder,generalFolder,lockedFolder,controlledField, generalField, lockedField);
     }
 
 

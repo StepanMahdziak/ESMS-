@@ -101,7 +101,7 @@ public with sharing class ControlledDocumentCustomTriggerHelper {
             }
         }
         for(Simploud__Controlled_Document__c cdOb: cdOld) {
-            cdOb.CheckDockType__c = **99*;
+            cdOb.CheckDockType__c = true;
         }
         update cdOld;
     }

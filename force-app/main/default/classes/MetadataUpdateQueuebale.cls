@@ -424,7 +424,7 @@ public with sharing class MetadataUpdateQueuebale implements Queueable, Database
         String lockedFolder, controlledFolder, generalFolder;
         String controlledField, generalField, lockedField;
         SharePoint_API_Info__mdt info = [
-            SELECT Auth_Provider__c, Site_Path__c
+            SELECT Auth_Provider__c, Site_Path__c,SharePoint_URL__c
             FROM SharePoint_API_Info__mdt
             WHERE DeveloperName = 'Integration_settings'
                                   LIMIT 1
@@ -452,6 +452,7 @@ public with sharing class MetadataUpdateQueuebale implements Queueable, Database
         metWrapper = new CustomMetadataWrapper(
             info.Auth_Provider__c,
             info.Site_Path__c,
+            info.SharePoint_URL__c,
             controlledFolder,
             generalFolder,
             lockedFolder,
