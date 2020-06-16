@@ -26,22 +26,22 @@ public with sharing class SharePointFileQueueable implements Queueable,Database.
 
 
     public void execute(QueueableContext context){
-            Set<Id> obIds = new Set<Id>();
-            for(ContentVersion cv : cvLst) {
-                if(cv.ContentDocumentId!= null) {
-                    obIds.add(cv.ContentDocumentId);
-                }
+        Set<Id> obIds = new Set<Id>();
+        for(ContentVersion cv : cvLst) {
+            if(cv.ContentDocumentId!= null) {
+                obIds.add(cv.ContentDocumentId);
             }
-            List<ContentVersion> cvList = [SELECT Id,Title,FileExtension,ContentSize,
-                                           VersionData,ContentDocumentId,ExternalDataSourceId,
-                                           ExternalDocumentInfo1,ExternalDocumentInfo2
-                                           FROM ContentVersion WHERE ContentDocumentId IN :obIds];
-            for(ContentVersion cv: cvList) {
-                if(cv.ExternalDataSourceId == null && cv.ExternalDocumentInfo1 == null && cv.ExternalDocumentInfo2 == null) {
-                    setCustomMetadata();
-                    defineDocType(cv);
-                    if ( docType == Constants.CONTROLLED_DOC_TYPE ||  docType == Constants.GENERAL_DOC_TYPE ) {
-                        if(!Test.isRunningTest()) {
+        }
+        List<ContentVersion> cvList = [SELECT Id,Title,FileExtension,ContentSize,
+                                       VersionData,ContentDocumentId,ExternalDataSourceId,
+                                       ExternalDocumentInfo1,ExternalDocumentInfo2
+                                       FROM ContentVersion WHERE ContentDocumentId IN :obIds];
+        for(ContentVersion cv: cvList) {
+            if(cv.ExternalDataSourceId == null && cv.ExternalDocumentInfo1 == null && cv.ExternalDocumentInfo2 == null) {
+                setCustomMetadata();
+                defineDocType(cv);
+                if ( docType == Constants.CONTROLLED_DOC_TYPE ||  docType == Constants.GENERAL_DOC_TYPE ) {
+                    if(!Test.isRunningTest()) {
                         UploadFileToSharePoint(cv);
                         getMetadata(cv);
                         getMetadataWithFields(cv);
@@ -215,14 +215,14 @@ public with sharing class SharePointFileQueueable implements Queueable,Database.
                 json+= '"'+mapFieldsFromSharePoint.get(key)+'" : {"__metadata":{"type":"Collection(Edm.String)"},"results":'+fileWrapper.generateValueForMultiSelectUpdate(''+ob.get(fieldsMap.get(key) )+'')+'},';
             }
 
-            if(fieldsMap.get(key) != null && mapFieldsWithType.get(key) == 'Choice'||
-               fieldsMap.get(key) != null && mapFieldsWithType.get(key) == 'Number'||
-               fieldsMap.get(key) != null && mapFieldsWithType.get(key) == 'Text' ||
-               fieldsMap.get(key) != null && mapFieldsWithType.get(key) == 'Boolean' ||
-               fieldsMap.get(key) != null && mapFieldsWithType.get(key) == 'URL' ||
-               fieldsMap.get(key) != null && mapFieldsWithType.get(key) == 'File' ||
-               fieldsMap.get(key) != null && mapFieldsWithType.get(key) == 'Guid' ||
-               fieldsMap.get(key) != null && mapFieldsWithType.get(key) == 'Note') {
+            if(fieldsMap.get(key) != null && mapFieldsWithType.get(key) == Constants.CHOICE_TYPE||
+               fieldsMap.get(key) != null && mapFieldsWithType.get(key) == Constants.NUMBER_TYPE||
+               fieldsMap.get(key) != null && mapFieldsWithType.get(key) == Constants.TEXT_TYPE||
+               fieldsMap.get(key) != null && mapFieldsWithType.get(key) == Constants.BOOLEAN_TYPE ||
+               fieldsMap.get(key) != null && mapFieldsWithType.get(key) == Constants.URL_TYPE ||
+               fieldsMap.get(key) != null && mapFieldsWithType.get(key) == Constants.FILE_TYPE ||
+               fieldsMap.get(key) != null && mapFieldsWithType.get(key) == Constants.GUID_TYPE ||
+               fieldsMap.get(key) != null && mapFieldsWithType.get(key) == Constants.NOTE_TYPE) {
 
                 if(!fieldsMap.get(key).contains('__r')) {
                     if(fieldsMap.get(key).contains('.')) {
@@ -252,7 +252,7 @@ public with sharing class SharePointFileQueueable implements Queueable,Database.
                             json+='"'+mapFieldsFromSharePoint.get(key)+'":"Not specified",';
                     }
 
-                }if(!fieldsMap.get(key).contains('.')) {
+                } if(!fieldsMap.get(key).contains('.')) {
                     json+='"'+mapFieldsFromSharePoint.get(key)+'":"'+ob.get(fieldsMap.get(key))+'",';
                 }
             }
@@ -323,18 +323,18 @@ public with sharing class SharePointFileQueueable implements Queueable,Database.
         ContentVersion newExternalFile = new ContentVersion();
         newExternalFile.ExternalDataSourceId = [SELECT Id FROM ExternalDataSource WHERE DeveloperName = 'ESMS_SharePoint_via_Azure' LIMIT 1].Id;
         if(docType == Constants.CONTROLLED_DOC_TYPE) {
-            if(cv.FileExtension == 'pdf') { 
-                if(metWrapper.sitePath == '/sites/edmsclientdocs/'){
-                String encodedUrl = EncodingUtil.urlEncode(externalFilePath,'UTF-8').replace('+','%20');
-                String encodeDockType =  EncodingUtil.urlEncode(metWrapper.controlledDocsFolder,'UTF-8').replace('+','%20');
-                String encodedSitePath = EncodingUtil.urlEncode(metWrapper.sitePath,'UTF-8' );
-                newExternalFile.ExternalDocumentInfo1 = sharePointURL+encodedSitePath+encodeDockType+'/Forms/AllItems.aspx'+'?id='+encodedUrl+'&parent='+encodeDockType;
+            if(cv.FileExtension == 'pdf') {
+                if(metWrapper.sitePath == Constants.EDMS_PATH) {
+                    String encodedUrl = EncodingUtil.urlEncode(externalFilePath,'UTF-8').replace('+','%20');
+                    String encodeDockType =  EncodingUtil.urlEncode(metWrapper.controlledDocsFolder,'UTF-8').replace('+','%20');
+                    String encodedSitePath = EncodingUtil.urlEncode(metWrapper.sitePath,'UTF-8' );
+                    newExternalFile.ExternalDocumentInfo1 = sharePointURL+'/'+encodedSitePath+encodeDockType+'/Forms/AllItems.aspx'+'?id='+encodedUrl+'&parent='+encodeDockType;
                 }else {
                     String sitePath = metWrapper.sitePath;
                     String encodedSitePath = EncodingUtil.urlEncode(metWrapper.sitePath,'UTF-8' );
                     String folderName = 'DrafttoDraftApprovalDocuments';
                     String encodedUrl = EncodingUtil.urlEncode(externalFilePath,'UTF-8').replace('+','%20');
-                    newExternalFile.ExternalDocumentInfo1 = 'https://medtoxdataline.sharepoint.com'+sitePath+folderName+'/Forms/AllItems.aspx'+'?viewpath='+encodedSitePath+'%2F'+folderName+'&id='+encodedUrl+'&parent='+encodedSitePath+'%2F'+folderName;
+                    newExternalFile.ExternalDocumentInfo1 = sharePointURL+sitePath+folderName+'/Forms/AllItems.aspx'+'?viewpath='+encodedSitePath+'%2F'+folderName+'&id='+encodedUrl+'&parent='+encodedSitePath+'%2F'+folderName;
 
                 }
             } if(cv.FileExtension != 'pdf') {

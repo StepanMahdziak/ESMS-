@@ -176,9 +176,9 @@ public with sharing class SharePointLockedFolderControlQueueable implements Queu
         fieldsMap = new Map<String,String>();
         String json='{"__metadata":{"type":'+type+'},';
         fields = metWrapper.controlledDocField;
-        if (docType == 'Controlled%20Documents') {
+        if (docType == Constants.CONTROLLED_DOC_TYPE) {
             fields = metWrapper.controlledDocField;
-        }else if (docType== 'General%20Documents') {
+        }else if (docType== Constants.GENERAL_DOC_TYPE) {
             fields = metWrapper.generalDocField;
         }
 
@@ -211,19 +211,19 @@ public with sharing class SharePointLockedFolderControlQueueable implements Queu
                 json+= '"'+mapFieldsFromSharePoint.get(key)+'" : {"__metadata":{"type":"Collection(Edm.String)"},"results":'+fileWrapper.generateValueForMultiSelectUpdate(''+ob.get(fieldsMap.get(key) )+'')+'},';
             }
 
-            if(fieldsMap.get(key) != null && mapFieldsWithType.get(key) == 'Choice'||
-               fieldsMap.get(key) != null && mapFieldsWithType.get(key) == 'Number'||
-               fieldsMap.get(key) != null && mapFieldsWithType.get(key) == 'Text' ||
-               fieldsMap.get(key) != null && mapFieldsWithType.get(key) == 'Boolean' ||
-               fieldsMap.get(key) != null && mapFieldsWithType.get(key) == 'URL' ||
-               fieldsMap.get(key) != null && mapFieldsWithType.get(key) == 'File' ||
-               fieldsMap.get(key) != null && mapFieldsWithType.get(key) == 'Guid' ||
-               fieldsMap.get(key) != null && mapFieldsWithType.get(key) == 'Note') {
+            if(fieldsMap.get(key) != null && mapFieldsWithType.get(key) == Constants.CHOICE_TYPE||
+               fieldsMap.get(key) != null && mapFieldsWithType.get(key) == Constants.NUMBER_TYPE||
+               fieldsMap.get(key) != null && mapFieldsWithType.get(key) == Constants.TEXT_TYPE||
+               fieldsMap.get(key) != null && mapFieldsWithType.get(key) == Constants.BOOLEAN_TYPE ||
+               fieldsMap.get(key) != null && mapFieldsWithType.get(key) == Constants.URL_TYPE ||
+               fieldsMap.get(key) != null && mapFieldsWithType.get(key) == Constants.FILE_TYPE ||
+               fieldsMap.get(key) != null && mapFieldsWithType.get(key) == Constants.GUID_TYPE ||
+               fieldsMap.get(key) != null && mapFieldsWithType.get(key) == Constants.NOTE_TYPE) {
 
                 if(!fieldsMap.get(key).contains('__r')) {
                     if(fieldsMap.get(key).contains('.')) {
-                        if(fieldsMap.get(key).split('\\.').size() == 3) {
-                            json+='"'+mapFieldsFromSharePoint.get(key)+'":"'+ob.getSObject(fieldsMap.get(key).split('\\.')[0]).getSObject(fieldsMap.get(key).split('\\.')[1]).get(fieldsMap.get(key).split('\\.')[2])+'",';
+                        if(fieldsMap.get(key).split(Constants.SPLIT_BY_DOT).size() == 3) {
+                            json+='"'+mapFieldsFromSharePoint.get(key)+'":"'+ob.getSObject(fieldsMap.get(key).split(Constants.SPLIT_BY_DOT)[0]).getSObject(fieldsMap.get(key).split(Constants.SPLIT_BY_DOT)[1]).get(fieldsMap.get(key).split(Constants.SPLIT_BY_DOT)[2])+'",';
                         }else {
                             json+='"'+mapFieldsFromSharePoint.get(key)+'":"'+ob.getSObject('Owner').get('Name')+'",';
                         }   
@@ -232,15 +232,15 @@ public with sharing class SharePointLockedFolderControlQueueable implements Queu
 
                 if(fieldsMap.get(key).contains('__r')) {
                     try{
-                        if(fieldsMap.get(key).split('\\.').size() == 5){
-                          json+='"'+mapFieldsFromSharePoint.get(key)+'":"'+ob.getSObject(fieldsMap.get(key).split('\\.')[0]).getSObject(fieldsMap.get(key).split('\\.')[1]).getSObject(fieldsMap.get(key).split('\\.')[2]).getSObject(fieldsMap.get(key).split('\\.')[3]).get(fieldsMap.get(key).split('\\.')[4])+'",';
+                        if(fieldsMap.get(key).split(Constants.SPLIT_BY_DOT).size() == 5){
+                          json+='"'+mapFieldsFromSharePoint.get(key)+'":"'+ob.getSObject(fieldsMap.get(key).split(Constants.SPLIT_BY_DOT)[0]).getSObject(fieldsMap.get(key).split(Constants.SPLIT_BY_DOT)[1]).getSObject(fieldsMap.get(key).split(Constants.SPLIT_BY_DOT)[2]).getSObject(fieldsMap.get(key).split(Constants.SPLIT_BY_DOT)[3]).get(fieldsMap.get(key).split(Constants.SPLIT_BY_DOT)[4])+'",';
     
                       }
-                        if(fieldsMap.get(key).split('\\.')[1].contains('__r')) {
-                            json+='"'+mapFieldsFromSharePoint.get(key)+'":"'+ob.getSObject(fieldsMap.get(key).split('\\.')[0]).getSObject(fieldsMap.get(key).split('\\.')[1]).get(fieldsMap.get(key).split('\\.')[2])+'",';
+                        if(fieldsMap.get(key).split(Constants.SPLIT_BY_DOT)[1].contains('__r')) {
+                            json+='"'+mapFieldsFromSharePoint.get(key)+'":"'+ob.getSObject(fieldsMap.get(key).split(Constants.SPLIT_BY_DOT)[0]).getSObject(fieldsMap.get(key).split(Constants.SPLIT_BY_DOT)[1]).get(fieldsMap.get(key).split(Constants.SPLIT_BY_DOT)[2])+'",';
 
-                        } if(!fieldsMap.get(key).split('\\.')[1].contains('__r')) {
-                            json+='"'+mapFieldsFromSharePoint.get(key)+'":"'+ob.getSObject(fieldsMap.get(key).split('\\.')[0]).get(fieldsMap.get(key).split('\\.')[1])+'",';
+                        } if(!fieldsMap.get(key).split(Constants.SPLIT_BY_DOT)[1].contains('__r')) {
+                            json+='"'+mapFieldsFromSharePoint.get(key)+'":"'+ob.getSObject(fieldsMap.get(key).split(Constants.SPLIT_BY_DOT)[0]).get(fieldsMap.get(key).split(Constants.SPLIT_BY_DOT)[1])+'",';
                         }
                     }
                     catch(Exception e) {
@@ -290,6 +290,7 @@ public with sharing class SharePointLockedFolderControlQueueable implements Queu
 
 
     public void createLinkOnPrevVersion() {
+        String sharePointURL = metWrapper.sharePointUrl;
         //Simploud__SimploudOrgSettings__c sett = new Simploud__SimploudOrgSettings__c();
         //sett = [SELECT Id,Simploud__IgnoreTriggers__c,Simploud__IgnoreConfigTrigger__c FROM Simploud__SimploudOrgSettings__c];
         Simploud__Controlled_Document__c cdObj = new Simploud__Controlled_Document__c();
@@ -301,18 +302,18 @@ public with sharing class SharePointLockedFolderControlQueueable implements Queu
             newExternalFile.ExternalDocumentInfo1 = serverRedirectedEmbedUri.replace('"','').replace('interactivepreview', 'view');
         }
         if(cv.FileExtension == 'pdf'){
-            if(metWrapper.sitePath == '/sites/edmsclientdocs/'){
+            if(metWrapper.sitePath == Constants.EDMS_PATH){
             String encodedFolderName = EncodingUtil.urlEncode(metWrapper.lockedDocsFolder,'UTF-8').replace('+','%20'); 
             String encodedTitle = EncodingUtil.urlEncode(cv.Title,'UTF-8').replace('+','%20');
             String sitePath = EncodingUtil.urlEncode(metWrapper.sitePath,'UTF-8' ).replace('+','%20');
-            newExternalFile.ExternalDocumentInfo1 ='https://medtoxdataline.sharepoint.com/'+sitePath+encodedFolderName+'/Forms/AllItems.aspx?id='+sitePath+encodedFolderName+'%2F'+encodedTitle+'.pdf&parent='+encodedFolderName;
+            newExternalFile.ExternalDocumentInfo1 =sharePointURL+'/'+sitePath+encodedFolderName+'/Forms/AllItems.aspx?id='+sitePath+encodedFolderName+'%2F'+encodedTitle+'.pdf&parent='+encodedFolderName;
             }else{
                 String folderName = 'ApprovedtoObsoleteDocuments';
-                cv.ExternalDocumentInfo1 = 'https://medtoxdataline.sharepoint.com'+metWrapper.sitePath+folderName+'/Forms/AllItems.aspx?viewpath='+EncodingUtil.urlEncode(metWrapper.sitePath,'UTF-8' )+folderName+'&id='+EncodingUtil.urlEncode(metWrapper.sitePath,'UTF-8' )+folderName+'%2F'+EncodingUtil.urlEncode(cv.Title,'UTF-8').replace('+','%20')+'.pdf&parent='+EncodingUtil.urlEncode(metWrapper.sitePath,'UTF-8' )+folderName;
+                cv.ExternalDocumentInfo1 = sharePointURL+metWrapper.sitePath+folderName+'/Forms/AllItems.aspx?viewpath='+EncodingUtil.urlEncode(metWrapper.sitePath,'UTF-8' )+folderName+'&id='+EncodingUtil.urlEncode(metWrapper.sitePath,'UTF-8' )+folderName+'%2F'+EncodingUtil.urlEncode(cv.Title,'UTF-8').replace('+','%20')+'.pdf&parent='+EncodingUtil.urlEncode(metWrapper.sitePath,'UTF-8' )+folderName;
 
             }
         }
-        newExternalFile.ExternalDocumentInfo2 = 'item:L3NpdGVzL2VkbXNjbGllbnRkb2Nz:6f4ce06a-ecd6-4a22-8710-c3e42f39bfd4:'+guid.replace('"','')+':'+id;
+        newExternalFile.ExternalDocumentInfo2 = Constants.EXTERNAL_DOC_INFO_ID+guid.replace('"','')+':'+id;
         newExternalFile.ContentLocation = 'E';
         newExternalFile.Title = cv.Title;
         newExternalFile.PathOnClient = newExternalFile.Title + '.' + cv.FileExtension;
