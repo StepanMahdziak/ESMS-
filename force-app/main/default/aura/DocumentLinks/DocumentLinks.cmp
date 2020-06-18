@@ -1,58 +1,67 @@
-<aura:component access="global" 
-                controller="DocumentRelationship" 
-                implements="flexipage:availableForRecordHome,force:hasRecordId,force:hasSObjectName,force:lightningQuickAction"  >
-    <aura:attribute name="recordId" type="String"/>
-    <aura:attribute name="sObjectName" type="String"/>
-    <aura:attribute name="availableList" type="List" default="[]"/>
-    
-    <aura:handler name="init" value="{!this}" action="{!c.init}" />
-                    <div class="slds-scrollable_x">
-                        <div class="slds-box ">
-                            <aura:if isTrue="{!v.availableList.length > 0}">
-                            <b>There are {!v.availableList.length} items that should be linked to the effective version</b> 
-                                 <lightning:button variant="brand" label="Update Links"  onclick="{!c.buttonClick}" class="slds-button btn"/>
-                                <aura:set attribute="else">
-                              <b>There are no items to update the links for this document</b>
-                            </aura:set>
-                            </aura:if>
-                            </div>
-                        
-                        <aura:if isTrue="{!v.availableList.length > 0}">
-                        <div class="slds-box ">
-                            <div class="slds-grid slds-grid_vertical-align-center slds-gutters">
-                                <div class="slds-col slds-size_4-of-12">  
-                                    <h1 class="slds-card__header-title">
-                                        <span><b>Affected Object</b></span>                  
-                                    </h1>
-                                </div>
-                                <div class="slds-col slds-size_4-of-12">  
-                                    <h1 class="slds-card__header-title">
-                                        <span><b>Title</b></span>                  
-                                    </h1>
-                                </div>
-                                <div class="slds-col slds-size_4-of-12">  
-                                    <h1 class="slds-card__header-title">
-                                        <span><b>Type</b></span>                  
-                                    </h1>
-                                </div>
-                            </div>
-                        </div>
-                            <aura:iteration items="{!v.availableList}" var="item_i" indexVar="index">
-                                <div class="slds-box">
-                                <div class="slds-grid slds-grid_vertical-align-center slds-gutters">
-                                    <div class="slds-col slds-size_4-of-12">
-                                        {!item_i.objectLabel}
-                                    </div>
-                                    <div class="slds-col slds-size_4-of-12">  
-                                         {!item_i.recordName}
-                                    </div>
-                                    <div class="slds-col slds-size_4-of-12"> 
-                                        {!item_i.linkingField}
-                                    </div>
-                                </div>
-                                </div>
-                            </aura:iteration>
-                        </aura:if>
-                    </div>
-    
+<aura:component
+  access="global"
+  controller="DocumentRelationship"
+  implements="flexipage:availableForRecordHome,force:hasRecordId,force:hasSObjectName,force:lightningQuickAction"
+>
+  <aura:attribute name="recordId" type="String" />
+  <aura:attribute name="sObjectName" type="String" />
+  <aura:attribute name="availableList" type="List" default="[]" />
+
+  <aura:handler name="init" value="{!this}" action="{!c.init}" />
+  <div class="slds-scrollable_x">
+    <div class="slds-box">
+      <aura:if isTrue="{!v.availableList.length > 0}">
+        <b
+          >There are {!v.availableList.length} items that should be linked to
+          the effective version</b
+        >
+        <lightning:button
+          variant="brand"
+          label="Update Links"
+          onclick="{!c.buttonClick}"
+          class="slds-button btn"
+        />
+        <aura:set attribute="else">
+          <b>There are no items to update the links for this document</b>
+        </aura:set>
+      </aura:if>
+    </div>
+
+    <aura:if isTrue="{!v.availableList.length > 0}">
+      <div class="slds-box">
+        <div class="slds-grid slds-grid_vertical-align-center slds-gutters">
+          <div class="slds-col slds-size_4-of-12">
+            <h1 class="slds-card__header-title">
+              <span><b>Affected Object</b></span>
+            </h1>
+          </div>
+          <div class="slds-col slds-size_4-of-12">
+            <h1 class="slds-card__header-title">
+              <span><b>Title</b></span>
+            </h1>
+          </div>
+          <div class="slds-col slds-size_4-of-12">
+            <h1 class="slds-card__header-title">
+              <span><b>Type</b></span>
+            </h1>
+          </div>
+        </div>
+      </div>
+      <aura:iteration items="{!v.availableList}" var="item_i" indexVar="index">
+        <div class="slds-box">
+          <div class="slds-grid slds-grid_vertical-align-center slds-gutters">
+            <div class="slds-col slds-size_4-of-12">
+              {!item_i.objectLabel}
+            </div>
+            <div class="slds-col slds-size_4-of-12">
+              {!item_i.recordName}
+            </div>
+            <div class="slds-col slds-size_4-of-12">
+              {!item_i.linkingField}
+            </div>
+          </div>
+        </div>
+      </aura:iteration>
+    </aura:if>
+  </div>
 </aura:component>

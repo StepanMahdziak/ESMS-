@@ -15,7 +15,7 @@ public with sharing class Test_SharePointLockedFolderControl {
         splfq.UploadFileToSharePoint(cv);
         splfq.getMetadataLockedDocument(cv);
         splfq.getMetadataURI(cv);
-        splfq.metadataPOSTLockedDocument();  
+        splfq.metadataPOSTLockedDocument();
         Test.setMock(HttpCalloutMock.class, new GetFieldsMock());
         splfq.getMetadataWithFields(cv);
         splfq.getFieldsFromCustomMetadata();
@@ -24,7 +24,15 @@ public with sharing class Test_SharePointLockedFolderControl {
         fileWrapper.generateValueForMultiSelectUpdate(null);
         fileWrapper.generateDate(Date.today());
         fileWrapper.generateDate(null);
-   		Test.stopTest();
-       
+        Test.stopTest();
+
+    }
+    @isTest
+    static void runQueueuable(){
+        Simploud__Controlled_Document__c cd = TestUtils.createControlledDocumentForLockedFolder();
+        Test.startTest();
+        SharePointLockedFolderControlQueueable splfq = new SharePointLockedFolderControlQueueable(cd);
+        System.enqueueJob(splfq);
+        Test.stopTest();
     }
 }

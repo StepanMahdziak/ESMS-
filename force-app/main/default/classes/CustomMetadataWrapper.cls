@@ -13,7 +13,16 @@ public with sharing class CustomMetadataWrapper {
         public String lockedDocField;
     
     
-    public CustomMetadataWrapper(String authProviderParam,String sitePathParam,String sharePointUrlParam,String controlledDocsFolderParam,String generalDocsFolderParam, String lockedDocsFolderParam, String controlledDocFieldParam, String generalDocFieldParam, String lockedDocfieldParam){
+    public CustomMetadataWrapper(String authProviderParam,
+                                 String sitePathParam,
+                                 String sharePointUrlParam,
+                                 String controlledDocsFolderParam,
+                                 String generalDocsFolderParam,
+                                 String lockedDocsFolderParam, 
+                                 String controlledDocFieldParam, 
+                                 String generalDocFieldParam, 
+                                 String lockedDocfieldParam)
+        {
         authProvider = authProviderParam;
         sitePath = sitePathParam;
         sharePointUrl = sharePointUrlParam;

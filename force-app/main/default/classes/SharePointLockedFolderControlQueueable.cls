@@ -1,5 +1,5 @@
 /*
-    Created by RedTag129 
+    Created by RedTag129
  */
 public with sharing class SharePointLockedFolderControlQueueable implements Queueable,Database.AllowsCallouts {
     FileMetadataWrapper fileWrapper = new FileMetadataWrapper();
@@ -45,7 +45,6 @@ public with sharing class SharePointLockedFolderControlQueueable implements Queu
 
 
     public void execute(QueueableContext context) {
-        if(!Test.isRunningTest()){
         setCustomMetadata();
         checkTypeFolder();
         getMetadata(cv);
@@ -55,8 +54,7 @@ public with sharing class SharePointLockedFolderControlQueueable implements Queu
         getMetadataLockedDocument(cv);
         getMetadataURI(cv);
         metadataPOSTLockedDocument();
-        createLinkOnPrevVersion();  
-        }
+        createLinkOnPrevVersion();
     }
 
     public void getMetadataWithFields(ContentVersion cv) {
@@ -75,7 +73,7 @@ public with sharing class SharePointLockedFolderControlQueueable implements Queu
             mapFieldsWithType.put(item.Title, item.TypeAsString);
             setTypes.add(item.TypeAsString);
         }
-        
+
     }
 
 
@@ -90,7 +88,7 @@ public with sharing class SharePointLockedFolderControlQueueable implements Queu
         Http http = new Http();
         HttpResponse response = http.send(request);
         path = fileWrapper.getURL(response.getBody());
-        
+
     }
 
 
@@ -117,7 +115,7 @@ public with sharing class SharePointLockedFolderControlQueueable implements Queu
 
 
 
-   //Upload file to Locked Documents
+    //Upload file to Locked Documents
     public void uploadFileToSharePoint(ContentVersion cv) {
         HttpRequest request = new HttpRequest();
         request.setMethod('POST');
@@ -131,7 +129,7 @@ public with sharing class SharePointLockedFolderControlQueueable implements Queu
         HttpResponse response = http.send(request);
     }
 
-	
+
 
     public void getMetadataLockedDocument(ContentVersion cv) {
         HttpRequest request = new HttpRequest();
@@ -142,7 +140,6 @@ public with sharing class SharePointLockedFolderControlQueueable implements Queu
         request.setEndpoint('callout:'+metWrapper.authProvider + url);
         Http http = new Http();
         HttpResponse response = http.send(request);
-        System.debug('body >>>> '+response.getBody());
         lockedPath = fileWrapper.getLockedURL(response.getBody());
     }
 
@@ -226,16 +223,16 @@ public with sharing class SharePointLockedFolderControlQueueable implements Queu
                             json+='"'+mapFieldsFromSharePoint.get(key)+'":"'+ob.getSObject(fieldsMap.get(key).split(Constants.SPLIT_BY_DOT)[0]).getSObject(fieldsMap.get(key).split(Constants.SPLIT_BY_DOT)[1]).get(fieldsMap.get(key).split(Constants.SPLIT_BY_DOT)[2])+'",';
                         }else {
                             json+='"'+mapFieldsFromSharePoint.get(key)+'":"'+ob.getSObject('Owner').get('Name')+'",';
-                        }   
+                        }
                     }
                 }
 
                 if(fieldsMap.get(key).contains('__r')) {
                     try{
-                        if(fieldsMap.get(key).split(Constants.SPLIT_BY_DOT).size() == 5){
-                          json+='"'+mapFieldsFromSharePoint.get(key)+'":"'+ob.getSObject(fieldsMap.get(key).split(Constants.SPLIT_BY_DOT)[0]).getSObject(fieldsMap.get(key).split(Constants.SPLIT_BY_DOT)[1]).getSObject(fieldsMap.get(key).split(Constants.SPLIT_BY_DOT)[2]).getSObject(fieldsMap.get(key).split(Constants.SPLIT_BY_DOT)[3]).get(fieldsMap.get(key).split(Constants.SPLIT_BY_DOT)[4])+'",';
-    
-                      }
+                        if(fieldsMap.get(key).split(Constants.SPLIT_BY_DOT).size() == 5) {
+                            json+='"'+mapFieldsFromSharePoint.get(key)+'":"'+ob.getSObject(fieldsMap.get(key).split(Constants.SPLIT_BY_DOT)[0]).getSObject(fieldsMap.get(key).split(Constants.SPLIT_BY_DOT)[1]).getSObject(fieldsMap.get(key).split(Constants.SPLIT_BY_DOT)[2]).getSObject(fieldsMap.get(key).split(Constants.SPLIT_BY_DOT)[3]).get(fieldsMap.get(key).split(Constants.SPLIT_BY_DOT)[4])+'",';
+
+                        }
                         if(fieldsMap.get(key).split(Constants.SPLIT_BY_DOT)[1].contains('__r')) {
                             json+='"'+mapFieldsFromSharePoint.get(key)+'":"'+ob.getSObject(fieldsMap.get(key).split(Constants.SPLIT_BY_DOT)[0]).getSObject(fieldsMap.get(key).split(Constants.SPLIT_BY_DOT)[1]).get(fieldsMap.get(key).split(Constants.SPLIT_BY_DOT)[2])+'",';
 
@@ -248,8 +245,8 @@ public with sharing class SharePointLockedFolderControlQueueable implements Queu
                             json+='"'+mapFieldsFromSharePoint.get(key)+'":"Not specified",';
                     }
 
-            // } if(!fieldsMap.get(key).contains('__r')) {
-                }if(!fieldsMap.get(key).contains('.')) {
+                    // } if(!fieldsMap.get(key).contains('__r')) {
+                } if(!fieldsMap.get(key).contains('.')) {
                     json+='"'+mapFieldsFromSharePoint.get(key)+'":"'+ob.get(fieldsMap.get(key))+'",';
                 }
 
@@ -298,15 +295,15 @@ public with sharing class SharePointLockedFolderControlQueueable implements Queu
         //this ContentVetsion will go to Locked folder
         ContentVersion newExternalFile = new ContentVersion();
         newExternalFile.ExternalDataSourceId = [SELECT Id FROM ExternalDataSource WHERE DeveloperName = 'ESMS_SharePoint_via_Azure' LIMIT 1].Id;
-        if(cv.FileExtension != 'pdf'){
+        if(cv.FileExtension != 'pdf') {
             newExternalFile.ExternalDocumentInfo1 = serverRedirectedEmbedUri.replace('"','').replace('interactivepreview', 'view');
         }
-        if(cv.FileExtension == 'pdf'){
-            if(metWrapper.sitePath == Constants.EDMS_PATH){
-            String encodedFolderName = EncodingUtil.urlEncode(metWrapper.lockedDocsFolder,'UTF-8').replace('+','%20'); 
-            String encodedTitle = EncodingUtil.urlEncode(cv.Title,'UTF-8').replace('+','%20');
-            String sitePath = EncodingUtil.urlEncode(metWrapper.sitePath,'UTF-8' ).replace('+','%20');
-            newExternalFile.ExternalDocumentInfo1 =sharePointURL+'/'+sitePath+encodedFolderName+'/Forms/AllItems.aspx?id='+sitePath+encodedFolderName+'%2F'+encodedTitle+'.pdf&parent='+encodedFolderName;
+        if(cv.FileExtension == 'pdf') {
+            if(metWrapper.sitePath == Constants.EDMS_PATH) {
+                String encodedFolderName = EncodingUtil.urlEncode(metWrapper.lockedDocsFolder,'UTF-8').replace('+','%20');
+                String encodedTitle = EncodingUtil.urlEncode(cv.Title,'UTF-8').replace('+','%20');
+                String sitePath = EncodingUtil.urlEncode(metWrapper.sitePath,'UTF-8' ).replace('+','%20');
+                newExternalFile.ExternalDocumentInfo1 =sharePointURL+'/'+sitePath+encodedFolderName+'/Forms/AllItems.aspx?id='+sitePath+encodedFolderName+'%2F'+encodedTitle+'.pdf&parent='+encodedFolderName;
             }else{
                 String folderName = 'ApprovedtoObsoleteDocuments';
                 cv.ExternalDocumentInfo1 = sharePointURL+metWrapper.sitePath+folderName+'/Forms/AllItems.aspx?viewpath='+EncodingUtil.urlEncode(metWrapper.sitePath,'UTF-8' )+folderName+'&id='+EncodingUtil.urlEncode(metWrapper.sitePath,'UTF-8' )+folderName+'%2F'+EncodingUtil.urlEncode(cv.Title,'UTF-8').replace('+','%20')+'.pdf&parent='+EncodingUtil.urlEncode(metWrapper.sitePath,'UTF-8' )+folderName;
@@ -321,19 +318,19 @@ public with sharing class SharePointLockedFolderControlQueueable implements Queu
 
         //delete previous a ContentVersion from ControlledDocument Object
         try{
-        List<ContentDocumentLink> oldCdl = [SELECT Id FROM ContentDocumentLink WHERE LinkedEntityId =: revisionObj.Id LIMIT 1];
-        //sett.Simploud__IgnoreTriggers__c = true;
-        //sett.Simploud__IgnoreConfigTrigger__c=true;
-       // update sett;
+            List<ContentDocumentLink> oldCdl = [SELECT Id FROM ContentDocumentLink WHERE LinkedEntityId =: revisionObj.Id LIMIT 1];
+            //sett.Simploud__IgnoreTriggers__c = true;
+            //sett.Simploud__IgnoreConfigTrigger__c=true;
+            // update sett;
 
-        delete oldCdl;
+            delete oldCdl;
         }catch(Exception e) {
             if(e.getMessage().contains('Delete failed'))
-                {
-                    return;
-                }
+            {
+                return;
             }
-       // sett.Simploud__IgnoreTriggers__c = false;
+        }
+        // sett.Simploud__IgnoreTriggers__c = false;
         //sett.Simploud__IgnoreConfigTrigger__c = false;
         //update sett;
 
@@ -348,7 +345,7 @@ public with sharing class SharePointLockedFolderControlQueueable implements Queu
     }
 
 
-    
+
 
 
     public void setCustomMetadata(){
@@ -363,7 +360,7 @@ public with sharing class SharePointLockedFolderControlQueueable implements Queu
                 controlledField = item.Fields__c;
             } else if(item.DeveloperName=='Locked_Documents')
                 lockedFolder = item.Folder_Title__c;
-                lockedField = item.Fields__c;
+            lockedField = item.Fields__c;
 
         }
         metWrapper = new CustomMetadataWrapper(info.Auth_Provider__c,info.Site_Path__c,info.SharePoint_URL__c,controlledFolder,generalFolder,lockedFolder,controlledField, generalField, lockedField);
@@ -381,5 +378,5 @@ public with sharing class SharePointLockedFolderControlQueueable implements Queu
     public SharePointLockedFolderControlQueueable() {
         System.debug('----EMPTY CONSTRUCTOR----');
     }
-  
+
 }

@@ -1,7 +1,7 @@
 @isTest
 private class PreviewComponentControllerTest {
     @isTest
-      static void runTestForPreviewComponent() {
+    static void runTestForPreviewComponent() {
         Task task = TestUtils.mockTaskForPreviewComponent();
         Task task2 = Testutils.mockDataForTrainingMaterials();
         Test.startTest();

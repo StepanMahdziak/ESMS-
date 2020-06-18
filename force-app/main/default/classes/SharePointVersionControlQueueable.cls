@@ -51,19 +51,19 @@ public with sharing class SharePointVersionControlQueueable implements Queueable
 
 
     public void execute(QueueableContext context) {
-        if(!Test.isRunningTest()){
-        setCustomMetadata();
-        checkTypeFolder();
-        getMetadata(cv);
-        getMetadataWithFields(cv);
-        downloadCurrentFile(cv);
-        UploadFileToSharePoint(cv);
-        getMetadataLockedDocument(cv);
-        getMetadataURI(cv);
-        getMetadataURIFromCD(cv);
-        metadataPOSTLockedDocument();
-        metadataRenameFile(newTitle);
-        createLinkOnPrevVersion();
+        if(!Test.isRunningTest()) {
+            setCustomMetadata();
+            checkTypeFolder();
+            getMetadata(cv);
+            getMetadataWithFields(cv);
+            downloadCurrentFile(cv);
+            UploadFileToSharePoint(cv);
+            getMetadataLockedDocument(cv);
+            getMetadataURI(cv);
+            getMetadataURIFromCD(cv);
+            metadataPOSTLockedDocument();
+            metadataRenameFile(newTitle);
+            createLinkOnPrevVersion();
         }
     }
 
@@ -83,10 +83,10 @@ public with sharing class SharePointVersionControlQueueable implements Queueable
             mapFieldsWithType.put(item.Title, item.TypeAsString);
             setTypes.add(item.TypeAsString);
         }
-        
+
     }
 
-     // get from Locked Folder
+    // get from Locked Folder
     public void getMetadata(ContentVersion cv) {
         HttpRequest request = new HttpRequest();
         request.setMethod('GET');
@@ -98,7 +98,7 @@ public with sharing class SharePointVersionControlQueueable implements Queueable
         Http http = new Http();
         HttpResponse response = http.send(request);
         path = fileWrapper.getURL(response.getBody());
-        
+
     }
 
 
@@ -125,7 +125,7 @@ public with sharing class SharePointVersionControlQueueable implements Queueable
 
 
 
-   //Upload file to Controlled Documents
+    //Upload file to Controlled Documents
     public void UploadFileToSharePoint(ContentVersion cv) {
         HttpRequest request = new HttpRequest();
         request.setMethod('POST');
@@ -139,7 +139,7 @@ public with sharing class SharePointVersionControlQueueable implements Queueable
         HttpResponse response = http.send(request);
     }
 
-	
+
 
     public void getMetadataLockedDocument(ContentVersion cv) {
         HttpRequest request = new HttpRequest();
@@ -219,13 +219,13 @@ public with sharing class SharePointVersionControlQueueable implements Queueable
             }
 
             if(fieldsMap.get(key) != null && mapFieldsWithType.get(key) == Constants.CHOICE_TYPE||
-            fieldsMap.get(key) != null && mapFieldsWithType.get(key) == Constants.NUMBER_TYPE||
-            fieldsMap.get(key) != null && mapFieldsWithType.get(key) == Constants.TEXT_TYPE||
-            fieldsMap.get(key) != null && mapFieldsWithType.get(key) == Constants.BOOLEAN_TYPE ||
-            fieldsMap.get(key) != null && mapFieldsWithType.get(key) == Constants.URL_TYPE ||
-            fieldsMap.get(key) != null && mapFieldsWithType.get(key) == Constants.FILE_TYPE ||
-            fieldsMap.get(key) != null && mapFieldsWithType.get(key) == Constants.GUID_TYPE ||
-            fieldsMap.get(key) != null && mapFieldsWithType.get(key) == Constants.NOTE_TYPE) {
+               fieldsMap.get(key) != null && mapFieldsWithType.get(key) == Constants.NUMBER_TYPE||
+               fieldsMap.get(key) != null && mapFieldsWithType.get(key) == Constants.TEXT_TYPE||
+               fieldsMap.get(key) != null && mapFieldsWithType.get(key) == Constants.BOOLEAN_TYPE ||
+               fieldsMap.get(key) != null && mapFieldsWithType.get(key) == Constants.URL_TYPE ||
+               fieldsMap.get(key) != null && mapFieldsWithType.get(key) == Constants.FILE_TYPE ||
+               fieldsMap.get(key) != null && mapFieldsWithType.get(key) == Constants.GUID_TYPE ||
+               fieldsMap.get(key) != null && mapFieldsWithType.get(key) == Constants.NOTE_TYPE) {
 
                 if(!fieldsMap.get(key).contains('__r')) {
                     if(fieldsMap.get(key).contains('.')) {
@@ -233,16 +233,16 @@ public with sharing class SharePointVersionControlQueueable implements Queueable
                             json+='"'+mapFieldsFromSharePoint.get(key)+'":"'+ob.getSObject(fieldsMap.get(key).split(Constants.SPLIT_BY_DOT)[0]).getSObject(fieldsMap.get(key).split(Constants.SPLIT_BY_DOT)[1]).get(fieldsMap.get(key).split(Constants.SPLIT_BY_DOT)[2])+'",';
                         }else {
                             json+='"'+mapFieldsFromSharePoint.get(key)+'":"'+ob.getSObject('Owner').get('Name')+'",';
-                        }   
+                        }
                     }
                 }
 
                 if(fieldsMap.get(key).contains('__r')) {
                     try{
-                        if(fieldsMap.get(key).split(Constants.SPLIT_BY_DOT).size() == 5){
-                          json+='"'+mapFieldsFromSharePoint.get(key)+'":"'+ob.getSObject(fieldsMap.get(key).split(Constants.SPLIT_BY_DOT)[0]).getSObject(fieldsMap.get(key).split(Constants.SPLIT_BY_DOT)[1]).getSObject(fieldsMap.get(key).split(Constants.SPLIT_BY_DOT)[2]).getSObject(fieldsMap.get(key).split(Constants.SPLIT_BY_DOT)[3]).get(fieldsMap.get(key).split(Constants.SPLIT_BY_DOT)[4])+'",';
-    
-                      }
+                        if(fieldsMap.get(key).split(Constants.SPLIT_BY_DOT).size() == 5) {
+                            json+='"'+mapFieldsFromSharePoint.get(key)+'":"'+ob.getSObject(fieldsMap.get(key).split(Constants.SPLIT_BY_DOT)[0]).getSObject(fieldsMap.get(key).split(Constants.SPLIT_BY_DOT)[1]).getSObject(fieldsMap.get(key).split(Constants.SPLIT_BY_DOT)[2]).getSObject(fieldsMap.get(key).split(Constants.SPLIT_BY_DOT)[3]).get(fieldsMap.get(key).split(Constants.SPLIT_BY_DOT)[4])+'",';
+
+                        }
                         if(fieldsMap.get(key).split(Constants.SPLIT_BY_DOT)[1].contains('__r')) {
                             json+='"'+mapFieldsFromSharePoint.get(key)+'":"'+ob.getSObject(fieldsMap.get(key).split(Constants.SPLIT_BY_DOT)[0]).getSObject(fieldsMap.get(key).split(Constants.SPLIT_BY_DOT)[1]).get(fieldsMap.get(key).split(Constants.SPLIT_BY_DOT)[2])+'",';
 
@@ -255,11 +255,10 @@ public with sharing class SharePointVersionControlQueueable implements Queueable
                             json+='"'+mapFieldsFromSharePoint.get(key)+'":"Not specified",';
                     }
 
-            // } if(!fieldsMap.get(key).contains('__r')) {
-                }if(!fieldsMap.get(key).contains('.')) {
+                } if(!fieldsMap.get(key).contains('.')) {
                     json+='"'+mapFieldsFromSharePoint.get(key)+'":"'+ob.get(fieldsMap.get(key))+'",';
                 }
-               
+
 
             }
 
@@ -302,15 +301,15 @@ public with sharing class SharePointVersionControlQueueable implements Queueable
         //this ContentVetsion go to LockedFolder
         ContentVersion newExternalFile = new ContentVersion();
         newExternalFile.ExternalDataSourceId = [SELECT Id FROM ExternalDataSource WHERE DeveloperName = 'ESMS_SharePoint_via_Azure' LIMIT 1].Id;
-        if(cv.FileExtension != 'pdf'){
+        if(cv.FileExtension != 'pdf') {
             newExternalFile.ExternalDocumentInfo1 = serverRedirectedEmbedUri.replace('"','').replace('interactivepreview', 'edit');
         }
-        if(cv.FileExtension == 'pdf'){
-            if(metWrapper.sitePath == Constants.EDMS_PATH){
-            String encodedFolderName = EncodingUtil.urlEncode(metWrapper.controlledDocsFolder,'UTF-8').replace('+','%20'); 
-            String encodedTitle = EncodingUtil.urlEncode(cv.Title,'UTF-8').replace('+','%20').replace('Effective','Draft');
-            String sitePath = EncodingUtil.urlEncode(metWrapper.sitePath,'UTF-8' ).replace('+','%20');
-            newExternalFile.ExternalDocumentInfo1 =sharePointURL+'/'+sitePath+encodedFolderName+'/Forms/AllItems.aspx?id='+sitePath+encodedFolderName+'%2F'+encodedTitle+'.pdf&parent='+encodedFolderName;
+        if(cv.FileExtension == 'pdf') {
+            if(metWrapper.sitePath == Constants.EDMS_PATH) {
+                String encodedFolderName = EncodingUtil.urlEncode(metWrapper.controlledDocsFolder,'UTF-8').replace('+','%20');
+                String encodedTitle = EncodingUtil.urlEncode(cv.Title,'UTF-8').replace('+','%20').replace('Effective','Draft');
+                String sitePath = EncodingUtil.urlEncode(metWrapper.sitePath,'UTF-8' ).replace('+','%20');
+                newExternalFile.ExternalDocumentInfo1 =sharePointURL+'/'+sitePath+encodedFolderName+'/Forms/AllItems.aspx?id='+sitePath+encodedFolderName+'%2F'+encodedTitle+'.pdf&parent='+encodedFolderName;
             }else{
                 String folderName = 'DrafttoDraftApprovalDocuments';
                 String encodedTitle = EncodingUtil.urlEncode(cv.Title,'UTF-8').replace('+','%20').replace('Effective','Draft');
@@ -325,10 +324,10 @@ public with sharing class SharePointVersionControlQueueable implements Queueable
         newExternalFile.Origin = 'H';
 
 
-       List<ContentDocumentLink> oldCdl = [SELECT Id FROM ContentDocumentLink WHERE LinkedEntityId =: oldVersionId ];
-       // sett.Simploud__IgnoreTriggers__c = true;
+        List<ContentDocumentLink> oldCdl = [SELECT Id FROM ContentDocumentLink WHERE LinkedEntityId =: oldVersionId ];
+        // sett.Simploud__IgnoreTriggers__c = true;
         //sett.Simploud__IgnoreConfigTrigger__c=true;
-       // update sett;
+        // update sett;
 
         delete oldCdl;
 
@@ -337,13 +336,13 @@ public with sharing class SharePointVersionControlQueueable implements Queueable
         // update sett;
 
         insert newExternalFile;
-        //go to Draft Effective
+        //go to Effective status
         ContentDocumentLink cdl = new ContentDocumentLink();
         cdl.ContentDocumentId = [SELECT ContentDocumentId FROM ContentVersion WHERE Id = :cv.Id LIMIT 1].ContentDocumentId;
         cdl.LinkedEntityId = oldVersionId;
         cdl.ShareType = 'I';
         insert cdl;
-        //Go to Draft status
+        //go to Draft status
         ContentDocumentLink cdl2 = new ContentDocumentLink();
         cdl2.ContentDocumentId = [SELECT ContentDocumentId FROM ContentVersion WHERE Id = :newExternalFile.Id LIMIT 1].ContentDocumentId;
         cdl2.LinkedEntityId = revisionObj.Id;
@@ -405,10 +404,18 @@ public with sharing class SharePointVersionControlQueueable implements Queueable
                 controlledField = item.Fields__c;
             } else if(item.DeveloperName=='Locked_Documents')
                 lockedFolder = item.Folder_Title__c;
-                lockedField = item.Fields__c;
+            lockedField = item.Fields__c;
 
         }
-        metWrapper = new CustomMetadataWrapper(info.Auth_Provider__c,info.Site_Path__c,info.SharePoint_URL__c,controlledFolder,generalFolder,lockedFolder,controlledField, generalField, lockedField);
+        metWrapper = new CustomMetadataWrapper(info.Auth_Provider__c,
+                                               info.Site_Path__c,
+                                               info.SharePoint_URL__c,
+                                               controlledFolder,
+                                               generalFolder,
+                                               lockedFolder,
+                                               controlledField,
+                                               generalField,
+                                               lockedField);
     }
 
 
@@ -423,5 +430,5 @@ public with sharing class SharePointVersionControlQueueable implements Queueable
     public SharePointVersionControlQueueable() {
         System.debug('----EMPTY CONSTRUCTOR----');
     }
-  
+
 }
