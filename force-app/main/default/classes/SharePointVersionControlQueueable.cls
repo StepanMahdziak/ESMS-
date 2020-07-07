@@ -72,7 +72,7 @@ public with sharing class SharePointVersionControlQueueable implements Queueable
         request.setMethod('GET');
         request.setHeader('Accept','application/json;odata=verbose');
         request.setHeader('Content-Type','application/json;odata=verbose');
-        String url = metWrapper.sitePath+'_api/web/lists/GetByTitle('+'\''+lockedFolder+'\''+')/fields';
+        String url = metWrapper.sitePath+'_api/web/lists/GetByTitle('+'\''+controlledFolder+'\''+')/fields';
         request.setEndpoint('callout:'+metWrapper.authProvider+url);
         Http http = new Http();
         HttpResponse response = http.send(request);
@@ -92,7 +92,7 @@ public with sharing class SharePointVersionControlQueueable implements Queueable
         request.setMethod('GET');
         request.setHeader('Accept','application/json;odata=verbose');
         request.setHeader('Content-Type','application/json;odata=verbose');
-        String url = metWrapper.sitePath+'_api/web/lists/GetByTitle('+'\''+lockedFolder+
+        String url = metWrapper.sitePath+'_api/web/lists/GetByTitle('+'\''+controlledFolder+
                      '\''+')/Files(\''+EncodingUtil.urlEncode(cv.Title,'UTF-8').replace('+','%20')+'.'+cv.FileExtension+'\')';
         request.setEndpoint('callout:'+metWrapper.authProvider+url);
         Http http = new Http();

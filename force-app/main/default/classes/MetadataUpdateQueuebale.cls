@@ -54,16 +54,16 @@ public with sharing class MetadataUpdateQueuebale implements Queueable, Database
         for(Simploud__Controlled_Document__c cdObj:cdObjs.values()) {
             setCustomMetadata();
             defineDocType(cv);
-            if(cdObj.Simploud__Status__c == 'Effective' ||  cdObj.Simploud__Status__c == 'Obsolete') {
-                docType = Constants.LOCKED_DOC_TYPE;
-            }
+            // if(cdObj.Simploud__Status__c == 'Effective' ||  cdObj.Simploud__Status__c == 'Obsolete') {
+            //     docType = Constants.LOCKED_DOC_TYPE;
+            // }
             if (cdObj.Simploud__Status__c == 'Cancelled') {
                 if (
                     versionNum != null &&
                     (Decimal.valueOf(versionNum) == cdObj.Simploud__Version__c ||
                      Decimal.valueOf(versionNum) + 1.0 == cdObj.Simploud__Version__c)
                     ) {
-                    docType = Constants.LOCKED_DOC_TYPE;
+                    docType = Constants.CONTROLLED_DOC_TYPE;
                 } else {
                     defineDocType(cv);
                 }
@@ -74,15 +74,15 @@ public with sharing class MetadataUpdateQueuebale implements Queueable, Database
                 getMetadataURI(cv);
                 getMetadataWithFields(cv);
                 cv.Title=cdObj.Name+' v'+Integer.valueof(cdObj.Record_Version__c)+' '+cdObj.Simploud__Status__c;
-
                 fileCheckOut(cv);
-                if (docType == Constants.LOCKED_DOC_TYPE) {
-                    metadataPOSTLockedDocument();
-                    fileCheckIn(cv);
-                    String newTitle = cdObj.Name+' v'+Integer.valueof(cdObj.Record_Version__c)+' '+cdObj.Simploud__Status__c;
-                    metadataRenameFile(newTitle);
+                // if (docType == Constants.LOCKED_DOC_TYPE) {
+                //     metadataPOSTLockedDocument();
+                //     fileCheckIn(cv);
+                //     String newTitle = cdObj.Name+' v'+Integer.valueof(cdObj.Record_Version__c)+' '+cdObj.Simploud__Status__c;
+                //     metadataRenameFile(newTitle);
 
-                } if (docType == Constants.CONTROLLED_DOC_TYPE) {
+                // } 
+                if (docType == Constants.CONTROLLED_DOC_TYPE) {
                     metadataPOSTControlledDocument();
                     fileCheckIn(cv);
                     String newTitle = cdObj.Name+' v'+Integer.valueof(cdObj.Record_Version__c)+' '+cdObj.Simploud__Status__c;
@@ -167,7 +167,7 @@ public with sharing class MetadataUpdateQueuebale implements Queueable, Database
         }
     }
 
-    public HttpResponse  getMetadata(ContentVersion cv) {
+    public void  getMetadata(ContentVersion cv) {
         HttpRequest request = new HttpRequest();
         request.setMethod('GET');
         request.setHeader('Accept', 'application/json;odata=verbose');
@@ -185,11 +185,15 @@ public with sharing class MetadataUpdateQueuebale implements Queueable, Database
             '\')';
         request.setEndpoint('callout:' + metWrapper.authProvider + url);
         Http http = new Http();
-        HttpResponse response = http.send(request);
-        if (response.getStatusCode() == 200) {
+        try{
+
+            HttpResponse response = http.send(request);
             path = fileWrapper.getURL(response.getBody());
-        }
-        return response;
+        }catch(Exception e) {
+                if(e.getMessage().contains('Attempt to '))
+                   return;
+            }
+            
     }
 
 

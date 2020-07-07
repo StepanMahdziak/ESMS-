@@ -39,7 +39,7 @@ public with sharing class SharePointLockedFolderControlQueueable implements Queu
         cv = [SELECT Id,Title, FileExtension,ExternalDocumentInfo1, ContentDocumentId FROM ContentVersion WHERE ContentDocumentId = :cdId];
         Simploud__Controlled_Document__c cdObj = new Simploud__Controlled_Document__c();
         cdObj = [SELECT Simploud__Status__c, Record_Version__c,Id, Name FROM Simploud__Controlled_Document__c WHERE Id =: recordId LIMIT 1];
-        newTitle =cdObj.Name+' v'+Integer.valueof(cdObj.Record_Version__c)+' '+cdObj.Simploud__Status__c;
+        newTitle =cdObj.Name+' v'+Integer.valueof(cdObj.Record_Version__c)+'.1 '+cdObj.Simploud__Status__c;
 
     }
 
@@ -47,14 +47,16 @@ public with sharing class SharePointLockedFolderControlQueueable implements Queu
     public void execute(QueueableContext context) {
         setCustomMetadata();
         checkTypeFolder();
-        getMetadata(cv);
-        getMetadataWithFields(cv);
-        downloadCurrentFile(cv);
-        uploadFileToSharePoint(cv);
-        getMetadataLockedDocument(cv);
-        getMetadataURI(cv);
-        metadataPOSTLockedDocument();
-        createLinkOnPrevVersion();
+        if(!Test.isRunningTest()) {
+            getMetadata(cv);
+            getMetadataWithFields(cv);
+            downloadCurrentFile(cv);
+            uploadFileToSharePoint(cv);
+            getMetadataLockedDocument(cv);
+            getMetadataURI(cv);
+            metadataPOSTLockedDocument();
+            createLinkOnPrevVersion();
+        }
     }
 
     public void getMetadataWithFields(ContentVersion cv) {
@@ -122,7 +124,7 @@ public with sharing class SharePointLockedFolderControlQueueable implements Queu
         request.setHeader('Accept','application/json;odata=verbose');
         request.setHeader('Content-Type','multipart/form-data');
         request.setHeader('Content-Length',String.valueOf(data.size()));
-        String url = metWrapper.sitePath+'_api/web/lists/GetByTitle('+'\''+newFolder+'\''+')/Files/add(name='+'\''+EncodingUtil.urlEncode(cv.Title,'UTF-8').replace('+','%20')+'.'+cv.FileExtension+ '\',overwrite=true)';
+        String url = metWrapper.sitePath+'_api/web/lists/GetByTitle('+'\''+folder+'\''+')/Files/add(name='+'\''+EncodingUtil.urlEncode(newTitle,'UTF-8').replace('+','%20')+'.'+cv.FileExtension+ '\',overwrite=true)';
         request.setEndpoint('callout:'+metWrapper.authProvider+url);
         request.setBodyAsBlob(data);
         Http http = new Http();
@@ -136,7 +138,7 @@ public with sharing class SharePointLockedFolderControlQueueable implements Queu
         request.setMethod('GET');
         request.setHeader('Accept', 'application/json;odata=verbose');
         request.setHeader('Content-Type', 'application/json;odata=verbose');
-        String url= metWrapper.sitePath+'_api/web/lists/GetByTitle('+'\''+newFolder+'\''+')/Files(\''+EncodingUtil.urlEncode(cv.Title,'UTF-8').replace('+','%20')+'.'+cv.FileExtension+'\')';
+        String url= metWrapper.sitePath+'_api/web/lists/GetByTitle('+'\''+folder+'\''+')/Files(\''+EncodingUtil.urlEncode(newTitle,'UTF-8').replace('+','%20')+'.'+cv.FileExtension+'\')';
         request.setEndpoint('callout:'+metWrapper.authProvider + url);
         Http http = new Http();
         HttpResponse response = http.send(request);
@@ -277,10 +279,6 @@ public with sharing class SharePointLockedFolderControlQueueable implements Queu
             );
         Http http = new Http();
         HttpResponse response=http.send(request);
-        if(response.getStatusCode() == 200) {
-            System.debug(response.getBody());
-        }
-        else System.debug(response.getBody());
     }
 
 
@@ -300,7 +298,7 @@ public with sharing class SharePointLockedFolderControlQueueable implements Queu
         }
         if(cv.FileExtension == 'pdf') {
             if(metWrapper.sitePath == Constants.EDMS_PATH) {
-                String encodedFolderName = EncodingUtil.urlEncode(metWrapper.lockedDocsFolder,'UTF-8').replace('+','%20');
+                String encodedFolderName = EncodingUtil.urlEncode(metWrapper.controlledDocsFolder,'UTF-8').replace('+','%20');
                 String encodedTitle = EncodingUtil.urlEncode(cv.Title,'UTF-8').replace('+','%20');
                 String sitePath = EncodingUtil.urlEncode(metWrapper.sitePath,'UTF-8' ).replace('+','%20');
                 newExternalFile.ExternalDocumentInfo1 =sharePointURL+'/'+sitePath+encodedFolderName+'/Forms/AllItems.aspx?id='+sitePath+encodedFolderName+'%2F'+encodedTitle+'.pdf&parent='+encodedFolderName;
@@ -312,7 +310,7 @@ public with sharing class SharePointLockedFolderControlQueueable implements Queu
         }
         newExternalFile.ExternalDocumentInfo2 = Constants.EXTERNAL_DOC_INFO_ID+guid.replace('"','')+':'+id;
         newExternalFile.ContentLocation = 'E';
-        newExternalFile.Title = cv.Title;
+        newExternalFile.Title = cdObj.Name+' v'+Integer.valueof(cdObj.Record_Version__c)+'.1 '+cdObj.Simploud__Status__c;
         newExternalFile.PathOnClient = newExternalFile.Title + '.' + cv.FileExtension;
         newExternalFile.Origin = 'H';
 
@@ -370,7 +368,7 @@ public with sharing class SharePointLockedFolderControlQueueable implements Queu
     public void checkTypeFolder(){
         folder = metWrapper.controlledDocsFolder.replace(' ','%20');
         fields = metWrapper.controlledDocField;
-        newFolder = metWrapper.lockedDocsFolder.replace(' ','%20');
+        // newFolder = metWrapper.lockedDocsFolder.replace(' ','%20');
         fields = metWrapper.lockedDocField;
 
     }
