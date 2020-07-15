@@ -45,6 +45,7 @@ public with sharing class MetadataUpdateQueuebale implements Queueable, Database
 
 
 
+   
     public void execute(QueueableContext context) {
         for(Simploud__Controlled_Document__c cdObj:cdObjs.values()) {
             recordId = cdObj.Id;
@@ -54,9 +55,6 @@ public with sharing class MetadataUpdateQueuebale implements Queueable, Database
         for(Simploud__Controlled_Document__c cdObj:cdObjs.values()) {
             setCustomMetadata();
             defineDocType(cv);
-            // if(cdObj.Simploud__Status__c == 'Effective' ||  cdObj.Simploud__Status__c == 'Obsolete') {
-            //     docType = Constants.LOCKED_DOC_TYPE;
-            // }
             if (cdObj.Simploud__Status__c == 'Cancelled') {
                 if (
                     versionNum != null &&
@@ -73,25 +71,31 @@ public with sharing class MetadataUpdateQueuebale implements Queueable, Database
                 getMetadata(cv);
                 getMetadataURI(cv);
                 getMetadataWithFields(cv);
-                cv.Title=cdObj.Name+' v'+Integer.valueof(cdObj.Record_Version__c)+' '+cdObj.Simploud__Status__c;
                 fileCheckOut(cv);
-                // if (docType == Constants.LOCKED_DOC_TYPE) {
-                //     metadataPOSTLockedDocument();
-                //     fileCheckIn(cv);
-                //     String newTitle = cdObj.Name+' v'+Integer.valueof(cdObj.Record_Version__c)+' '+cdObj.Simploud__Status__c;
-                //     metadataRenameFile(newTitle);
-
-                // } 
+            
                 if (docType == Constants.CONTROLLED_DOC_TYPE) {
                     metadataPOSTControlledDocument();
                     fileCheckIn(cv);
-                    String newTitle = cdObj.Name+' v'+Integer.valueof(cdObj.Record_Version__c)+' '+cdObj.Simploud__Status__c;
-                    metadataRenameFile(newTitle);
+                    if(cdObj.Simploud__Status__c == 'Effective'){
+                        String newTitle = cdObj.Name+' v'+Integer.valueof(cdObj.Record_Version__c)+' '+cdObj.Simploud__Status__c;
+                        metadataRenameFile(newTitle);
+                    }
+                    if(cdObj.Simploud__Status__c == 'Obsolete'){
+                        String newTitle = cdObj.Name+' v'+Integer.valueof(cdObj.Record_Version__c)+' '+cdObj.Simploud__Status__c;
+                        metadataRenameFile(newTitle);
+                    }
                 } if (docType == Constants.GENERAL_DOC_TYPE) {
                     metadataPOSTGeneralDocument();
                     fileCheckIn(cv);
                 }
-                cv.Title=cdObj.Name+' v'+Integer.valueof(cdObj.Record_Version__c)+' '+cdObj.Simploud__Status__c;
+                if(cdObj.Simploud__Status__c == 'Effective'  && cv.FileExtension == 'pdf'){
+                    cv.Title = cdObj.Name+' v'+Integer.valueof(cdObj.Record_Version__c)+' '+cdObj.Simploud__Status__c;
+                    update cv;
+                }
+                if(cdObj.Simploud__Status__c == 'Obsolete'  && cv.FileExtension == 'pdf'){
+                    cv.Title = cdObj.Name+' v'+Integer.valueof(cdObj.Record_Version__c)+' '+cdObj.Simploud__Status__c;
+                    update cv;
+                }
                 if(cv.FileExtension == 'pdf') {
                     if(docType == Constants.CONTROLLED_DOC_TYPE) {
                         if(metWrapper.sitePath == Constants.EDMS_PATH) {
@@ -106,36 +110,26 @@ public with sharing class MetadataUpdateQueuebale implements Queueable, Database
                             update cv;
                         }
                     }
-                    if(docType == Constants.LOCKED_DOC_TYPE) {
-                        if(metWrapper.sitePath == Constants.EDMS_PATH) {
-                            String encodedFolderName2 = EncodingUtil.urlEncode(metWrapper.lockedDocsFolder,'UTF-8').replace('+','%20');
-                            String encodedTitle2 = EncodingUtil.urlEncode(cv.Title,'UTF-8').replace('+','%20');
-                            String sitePath = EncodingUtil.urlEncode(metWrapper.sitePath,'UTF-8' ).replace('+','%20');
-                            cv.ExternalDocumentInfo1 = metWrapper.sharePointUrl+'/'+sitePath+encodedFolderName2+'/Forms/AllItems.aspx?id='+sitePath+encodedFolderName2+'%2F'+encodedTitle2+'.pdf&parent='+encodedFolderName2;
-                            update cv;
-                        }else{
-                            String folderName = 'ApprovedtoObsoleteDocuments';
-                            cv.ExternalDocumentInfo1 = metWrapper.sharePointUrl+metWrapper.sitePath+folderName+'/Forms/AllItems.aspx?viewpath='+EncodingUtil.urlEncode(metWrapper.sitePath,'UTF-8' )+folderName+'&id='+EncodingUtil.urlEncode(metWrapper.sitePath,'UTF-8' )+folderName+'%2F'+EncodingUtil.urlEncode(cv.Title,'UTF-8').replace('+','%20')+'.pdf&parent='+EncodingUtil.urlEncode(metWrapper.sitePath,'UTF-8' )+folderName;
-                            update cv;
-                        }
-                    }
                 }
 
                 if(cdObj.Simploud__Status__c == 'Approved' && cv.FileExtension != 'pdf' ) {
                     cv.ExternalDocumentInfo1 = cv.ExternalDocumentInfo1.replace('edit', 'view');
                     update cv;
                 }
+                if(cdObj.Simploud__Status__c == 'Effective'  && cv.FileExtension != 'pdf'){
+                    cv.Title = cdObj.Name+' v'+Integer.valueof(cdObj.Record_Version__c)+' '+cdObj.Simploud__Status__c;
+                    update cv;
+                }
+                if(cdObj.Simploud__Status__c == 'Obsolete'  && cv.FileExtension != 'pdf'){
+                    cv.Title = cdObj.Name+' v'+Integer.valueof(cdObj.Record_Version__c)+' '+cdObj.Simploud__Status__c;
+                    update cv;
+                }
                 else
                     update cv;
-                //   }
-                if(cdObj.Simploud__Status__c =='Approved') {
-                    System.enqueueJob(new SharePointLockedFolderControlQueueable(cdObj));
-                }
             }
         }
 
     }
-
     public void defineDocType(ContentVersion cv) {
         list<ContentDocumentLink> cdlList = [
             SELECT LinkedEntityId
@@ -185,14 +179,15 @@ public with sharing class MetadataUpdateQueuebale implements Queueable, Database
             '\')';
         request.setEndpoint('callout:' + metWrapper.authProvider + url);
         Http http = new Http();
-        try{
+       // try{
 
             HttpResponse response = http.send(request);
             path = fileWrapper.getURL(response.getBody());
-        }catch(Exception e) {
-                if(e.getMessage().contains('Attempt to '))
-                   return;
-            }
+       // }catch(Exception e) {
+              //  if(e.getMessage().contains('Attempt to '))
+                 //  return;
+           // }
+            System.debug('path>> ' + path);
             
     }
 

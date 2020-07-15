@@ -44,7 +44,7 @@ public with sharing class SharePointVersionControlQueueable implements Queueable
         oldObj =[SELECT Id,Simploud__Status__c FROM Simploud__Controlled_Document__c WHERE Id=:oldVersionId];
         Simploud__Controlled_Document__c cdObj = new Simploud__Controlled_Document__c();
         cdObj = [SELECT Simploud__Status__c, Record_Version__c,Id, Name FROM Simploud__Controlled_Document__c WHERE Id =: recordId LIMIT 1];
-        newTitle =cdObj.Name+' v'+Integer.valueof(cdObj.Record_Version__c)+' '+cdObj.Simploud__Status__c;
+        newTitle = cdObj.Name;
 
     }
 
@@ -132,7 +132,7 @@ public with sharing class SharePointVersionControlQueueable implements Queueable
         request.setHeader('Accept','application/json;odata=verbose');
         request.setHeader('Content-Type','multipart/form-data');
         request.setHeader('Content-Length',String.valueOf(data.size()));
-        String url = metWrapper.sitePath+'_api/web/lists/GetByTitle('+'\''+controlledFolder+'\''+')/Files/add(name='+'\''+EncodingUtil.urlEncode(cv.Title,'UTF-8').replace('+','%20')+'.'+cv.FileExtension+ '\',overwrite=true)';
+        String url = metWrapper.sitePath+'_api/web/lists/GetByTitle('+'\''+controlledFolder+'\''+')/Files/add(name='+'\''+EncodingUtil.urlEncode('test','UTF-8').replace('+','%20')+'.'+cv.FileExtension+ '\',overwrite=true)';
         request.setEndpoint('callout:'+metWrapper.authProvider+url);
         request.setBodyAsBlob(data);
         Http http = new Http();
@@ -146,7 +146,7 @@ public with sharing class SharePointVersionControlQueueable implements Queueable
         request.setMethod('GET');
         request.setHeader('Accept', 'application/json;odata=verbose');
         request.setHeader('Content-Type', 'application/json;odata=verbose');
-        String url= metWrapper.sitePath+'_api/web/lists/GetByTitle('+'\''+controlledFolder+'\''+')/Files(\''+EncodingUtil.urlEncode(cv.Title,'UTF-8').replace('+','%20')+'.'+cv.FileExtension+'\')';
+        String url= metWrapper.sitePath+'_api/web/lists/GetByTitle('+'\''+controlledFolder+'\''+')/Files(\''+EncodingUtil.urlEncode('test','UTF-8').replace('+','%20')+'.'+cv.FileExtension+'\')';
         request.setEndpoint('callout:'+metWrapper.authProvider + url);
         Http http = new Http();
         HttpResponse response = http.send(request);
@@ -307,19 +307,19 @@ public with sharing class SharePointVersionControlQueueable implements Queueable
         if(cv.FileExtension == 'pdf') {
             if(metWrapper.sitePath == Constants.EDMS_PATH) {
                 String encodedFolderName = EncodingUtil.urlEncode(metWrapper.controlledDocsFolder,'UTF-8').replace('+','%20');
-                String encodedTitle = EncodingUtil.urlEncode(cv.Title,'UTF-8').replace('+','%20').replace('Effective','Draft');
+                String encodedTitle = EncodingUtil.urlEncode(cdObj.Name,'UTF-8').replace('+','%20').replace('Effective','Draft');
                 String sitePath = EncodingUtil.urlEncode(metWrapper.sitePath,'UTF-8' ).replace('+','%20');
                 newExternalFile.ExternalDocumentInfo1 =sharePointURL+'/'+sitePath+encodedFolderName+'/Forms/AllItems.aspx?id='+sitePath+encodedFolderName+'%2F'+encodedTitle+'.pdf&parent='+encodedFolderName;
             }else{
                 String folderName = 'DrafttoDraftApprovalDocuments';
-                String encodedTitle = EncodingUtil.urlEncode(cv.Title,'UTF-8').replace('+','%20').replace('Effective','Draft');
+                String encodedTitle = EncodingUtil.urlEncode(cdObj.Name,'UTF-8').replace('+','%20').replace('Effective','Draft');
                 newExternalFile.ExternalDocumentInfo1 = sharePointURL+metWrapper.sitePath+folderName+'/Forms/AllItems.aspx?viewpath='+EncodingUtil.urlEncode(metWrapper.sitePath,'UTF-8' )+folderName+'&id='+EncodingUtil.urlEncode(metWrapper.sitePath,'UTF-8' )+folderName+'%2F'+encodedTitle+'.pdf&parent='+EncodingUtil.urlEncode(metWrapper.sitePath,'UTF-8' )+folderName;
 
             }
         }
         newExternalFile.ExternalDocumentInfo2 = Constants.EXTERNAL_DOC_INFO_ID+guid.replace('"','')+':'+id;
         newExternalFile.ContentLocation = 'E';
-        newExternalFile.Title = cdObj.Name+' v'+Integer.valueof(cdObj.Record_Version__c)+' Draft';
+        newExternalFile.Title = cdObj.Name;
         newExternalFile.PathOnClient = newExternalFile.Title + '.' + cv.FileExtension;
         newExternalFile.Origin = 'H';
 

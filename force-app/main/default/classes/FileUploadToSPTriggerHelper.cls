@@ -35,7 +35,8 @@ public with sharing class FileUploadToSPTriggerHelper {
                     for(Simploud__Controlled_Document__c cd :obj ) {
                         if(cd.Simploud__Status__c != null) {
                             for(ContentVersion cv : cvToUpdate) {
-                                cv.Title = cd.Name+' v'+Integer.valueof(cd.Record_Version__c)+' '+cd.Simploud__Status__c;
+                                cv.Title = cd.Name;
+                                // cv.Title = cd.Name+' v'+Integer.valueof(cd.Record_Version__c)+' '+cd.Simploud__Status__c;
                             }
                         }
                     }
