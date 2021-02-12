@@ -311,7 +311,7 @@ public with sharing class SharePointVersionControlQueueable implements Queueable
                 String sitePath = EncodingUtil.urlEncode(metWrapper.sitePath,'UTF-8' ).replace('+','%20');
                 newExternalFile.ExternalDocumentInfo1 =sharePointURL+'/'+sitePath+encodedFolderName+'/Forms/AllItems.aspx?id='+sitePath+encodedFolderName+'%2F'+encodedTitle+'.pdf&parent='+encodedFolderName;
             }else{
-                String folderName = 'DrafttoDraftApprovalDocuments';
+                String folderName = EncodingUtil.urlEncode(metWrapper.controlledDocsFolder,'UTF-8').replace('+','%20');
                 String encodedTitle = EncodingUtil.urlEncode(cdObj.Name,'UTF-8').replace('+','%20').replace('Effective','Draft');
                 newExternalFile.ExternalDocumentInfo1 = sharePointURL+metWrapper.sitePath+folderName+'/Forms/AllItems.aspx?viewpath='+EncodingUtil.urlEncode(metWrapper.sitePath,'UTF-8' )+folderName+'&id='+EncodingUtil.urlEncode(metWrapper.sitePath,'UTF-8' )+folderName+'%2F'+encodedTitle+'.pdf&parent='+EncodingUtil.urlEncode(metWrapper.sitePath,'UTF-8' )+folderName;
 

@@ -18,8 +18,8 @@ public class TestUtils {
         cd.Internal_External__c='Internal';
         cd.Document_Type_ID1__c='Policy';
         cd.ESMS_Client__c=acc.Id;
-        cd.Simploud__Version__c = 0.1;
-        cd.Simploud__Status__c='Review';
+        // cd.Simploud__Version__c = 0.1;
+        cd.Simploud__Status__c='Draft';
         cd.CheckDockType__c = true;
         cd.Record_Version__c = 1.1;
         insert cd;
@@ -35,7 +35,7 @@ public class TestUtils {
         cd2.Document_Type_ID1__c='Policy';
         cd2.ESMS_Client__c=acc.Id;
         cd2.Simploud__Version__c = 1.1;
-        cd2.Simploud__Status__c='Review';
+        cd2.Simploud__Status__c='Draft';
         cd2.CheckDockType__c = true;
         cd2.Record_Version__c = 1.1;
         cd2.Simploud__Previous_Version__c = cd.Id;
@@ -81,7 +81,7 @@ public class TestUtils {
         cd2.Document_Type_ID1__c='Policy';
         cd2.ESMS_Client__c=acc.Id;
         cd2.Simploud__Version__c = 0.1;
-        cd2.Simploud__Status__c='Review';
+        cd2.Simploud__Status__c='Draft';
         //cd2.Simploud__Previous_Version__c = cd2.Id;
         insert cd2;
 
@@ -97,14 +97,13 @@ public class TestUtils {
         cd.Document_Type_ID1__c='Policy';
         cd.ESMS_Client__c=acc.Id;
         cd.Simploud__Version__c = 0.1;
-        cd.Simploud__Status__c='Review';
+        cd.Simploud__Status__c='Draft';
         cd.CheckDockType__c = true;
         cd.Simploud__Previous_Version__c = cd2.Id;
 
         insert cd;
         return cd;
     }
-
 
     public static Simploud__General_Document__c mockGeneralDocuments(){
         Account acc = mockAccount();
@@ -170,56 +169,112 @@ public class TestUtils {
 
 
 
+
     public static Map<Id,Simploud__Controlled_Document__c> mockMapControlledDocumentsForMetadataUpdate(){
         Account acc = mockAccount();
         ContentVersion cv= mockContentVersion();
         Map<Id, Simploud__Controlled_Document__c> mapControlledDocs = new Map<Id, Simploud__Controlled_Document__c> ();
         Simploud__Controlled_Document__c cd2 = new Simploud__Controlled_Document__c();
-        cd2.Name='TEST DOC2';
+        cd2.Name='TEST DOC21';
         cd2.Internal_External__c='Internal';
         cd2.Document_Type_ID1__c='Policy';
         cd2.ESMS_Client__c=acc.Id;
         cd2.Simploud__Version__c = 0.1;
-        cd2.Simploud__Status__c='Review';
+        cd2.Simploud__Status__c='Draft';
         //cd2.Simploud__Previous_Version__c = cd2.Id;
         insert cd2;
 
         Simploud__Controlled_Document__c cd = new Simploud__Controlled_Document__c();
-        cd.Name='TEST DOC';
+        cd.Name='TEST DOC1';
         cd.Internal_External__c='Internal';
         cd.Document_Type_ID1__c='Policy';
         cd.ESMS_Client__c=acc.Id;
         cd.Simploud__Version__c = 0.1;
-        cd.Simploud__Status__c='Review';
+        cd.Simploud__Status__c='Draft';
         cd.CheckDockType__c = true;
         insert cd;
-
+        
+        
+        Database.DMLOptions dml = new Database.DMLOptions();
+		dml.DuplicateRuleHeader.AllowSave = true;
+        Simploud__SimploudOrgSettings__c sett = new Simploud__SimploudOrgSettings__c();
+       // sett = [SELECT Id,Simploud__IgnoreTriggers__c,Simploud__IgnoreConfigTrigger__c FROM Simploud__SimploudOrgSettings__c LIMIT 1]; 
+        sett.Simploud__IgnoreConfigTrigger__c = true;
+        sett.Simploud__IgnoreTriggers__c = true;
+        Database.SaveResult sr = Database.insert(sett, dml); 
+		if (sr.isSuccess()) {   
+ 		System.debug('Duplicate account has been inserted in Salesforce!'); 
         ContentDocumentLink cdl = new ContentDocumentLink();
-        cdl.ContentDocumentId = [SELECT ContentDocumentId FROM ContentVersion WHERE Id =: cv.Id].ContentDocumentId;
+        cdl.ContentDocumentId = [SELECT ContentDocumentId FROM ContentVersion WHERE Id = :cv.Id].ContentDocumentId;
         cdl.LinkedEntityId = cd.Id;
         cdl.ShareType='I';
         insert cdl;
-        //Simploud__Controlled_Document__c cd2 = mockControlledDocuments();
-        //Simploud__Controlled_Document__c cd = mockControlledDocuments();
-        //ContentDocumentLink cdl = new ContentDocumentLink();
-        //cdl.ContentDocumentId = cv.ContentDocumentId;
-        //cdl.LinkedEntityId = cd2.Id;
-        //cdl.ShareType='I';
-        //insert cdl;
+        System.debug('Duplicate account has been inserted in Salesforce!'); 
+		}
         mapControlledDocs.put(cd2.id, cd);
         return mapControlledDocs;
     }
 
     public static ContentVersion mockDataForFileUploadControlledDocuments(){
+        ContentVersion cv = new ContentVersion();
+        cv.Title='TEST CV';
+        cv.PathOnClient ='TEST CV.docx';
+        cv.Origin='H';
+        cv.ContentLocation='E';
+        cv.VersionData = EncodingUtil.base64Decode('TEST DATA');
+        cv.ExternalDataSourceId = [SELECT Id FROM ExternalDataSource WHERE DeveloperName='ESMS_SharePoint_via_Azure' LIMIT 1].Id;
+        cv.ExternalDocumentInfo1='xd1';
+        cv.ExternalDocumentInfo2='xd2';
+        insert cv;
+        Account acc = new Account(Name='TEST ACC');
+        insert acc;
+        Simploud__Controlled_Document__c cd = new Simploud__Controlled_Document__c();
+        cd.Name='test2';
+        cd.Internal_External__c='Internal';
+        cd.Document_Type_ID1__c='Policy';
+        cd.ESMS_Client__c=acc.Id;
+        cd.Simploud__Status__c='Draft';
+        cd.CheckDockType__c = true;
+        cd.Record_Version__c = 1.1;
+        insert cd;
+
+        Database.DMLOptions dml = new Database.DMLOptions();
+		dml.DuplicateRuleHeader.AllowSave = true;
+        Simploud__SimploudOrgSettings__c sett = new Simploud__SimploudOrgSettings__c();
+       // sett = [SELECT Id,Simploud__IgnoreTriggers__c,Simploud__IgnoreConfigTrigger__c FROM Simploud__SimploudOrgSettings__c LIMIT 1]; 
+        system.debug('test--> ' + sett);
+        sett.Simploud__IgnoreConfigTrigger__c = true;
+        sett.Simploud__IgnoreTriggers__c = true;
+        Database.SaveResult sr = Database.insert(sett, dml); 
+		if (sr.isSuccess()) {   
+ 		System.debug('Duplicate account has been inserted in Salesforce!'); 
+         ContentDocumentLink cdl = new ContentDocumentLink();
+        cdl.ContentDocumentId = [SELECT ContentDocumentId FROM ContentVersion WHERE Id = :cv.Id].ContentDocumentId;
+        cdl.LinkedEntityId = cd.Id;
+        cdl.ShareType='I';
+        insert cdl;
+        System.debug('Duplicate account has been inserted in Salesforce!');             
+		}
+
+       
+
+        return [SELECT Title,FileExtension,PathOnClient,ExternalDocumentInfo1,ExternalDocumentInfo2,VersionData,ContentDocumentId FROM ContentVersion];
+    }
+
+    public static Simploud__Controlled_Document__c mockDataForUpdateTrigger(){
         Account acc = mockAccount();
         ContentVersion cv= mockContentVersion();
         Simploud__Controlled_Document__c cd = mockControlledDocuments();
+        cd.Simploud__Status__c = 'Draft';
+        cd.Simploud__Is_Closed__c = false;
+        update cd;
+
         ContentDocumentLink cdl = new ContentDocumentLink();
         cdl.ContentDocumentId = cv.ContentDocumentId;
         cdl.LinkedEntityId = cd.Id;
         cdl.ShareType='I';
         insert cdl;
-        return [SELECT Title,FileExtension,PathOnClient,ExternalDocumentInfo1,ExternalDocumentInfo2,VersionData,ContentDocumentId FROM ContentVersion];
+        return [SELECT Id,Simploud__Status__c,Document__c FROM Simploud__Controlled_Document__c];
     }
 
     public static ContentVersion mockDataForFileUploadGeneralDocuments(){

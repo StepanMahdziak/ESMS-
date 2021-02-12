@@ -9,7 +9,7 @@ trigger ControlledDocumentCustomTrigger on Simploud__Controlled_Document__c (aft
     }
     if(Trigger.isAfter) {
         if(Trigger.isUpdate) {
-            ControlledDocumentCustomTriggerHelper.afterUpdateTriggerHandler(Trigger.new, Trigger.newMap, Trigger.oldMap );
+            ControlledDocumentCustomTriggerHelper.afterUpdateTriggerHandler(Trigger.newMap, Trigger.oldMap );
         }
 
         if(Trigger.isInsert) {

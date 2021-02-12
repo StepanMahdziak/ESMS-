@@ -6,9 +6,14 @@ private class Test_MetadataUpdate {
     @isTest
     static void testQueueableRunAndUpdateMetadataCD(){
         ContentVersion cv = TestUtils.mockDataForFileUploadControlledDocuments();
+        system.debug('cv>> ' + cv);
         Simploud__Controlled_Document__c controlledDocs = TestUtils.mockControlledDocuments();
         Map<Id,Simploud__Controlled_Document__c > mapControlledDocs = TestUtils.mockMapControlledDocumentsForMetadataUpdate();
+        system.debug('mapControlledDocs>> ' + mapControlledDocs);
+
         Map<Id,Simploud__Controlled_Document__c > mapControlledDocs2 = TestUtils.mockMapControlledDocumentsForMetadataUpdate();
+        system.debug('mapControlledDocs2>> ' + mapControlledDocs2);
+
         Test.startTest();
         MetadataUpdateQueuebale muqc = new MetadataUpdateQueuebale(mapControlledDocs, mapControlledDocs2);
         muqc.setRecordId(controlledDocs.Id);
@@ -21,7 +26,7 @@ private class Test_MetadataUpdate {
         muqc.getMetadataURI(cv);
         muqc.fileCheckOut(cv);
         muqc.metadataPOSTControlledDocument();
-        muqc.metadataPOSTLockedDocument();
+       // muqc.metadataPOSTLockedDocument();
         muqc.fileCheckIn(cv);
         muqc.metadataRenameFile('Test');
         Test.setMock(HttpCalloutMock.class, new GetFieldsMock());
@@ -69,6 +74,7 @@ private class Test_MetadataUpdate {
      @isTest
      static void runQueueuable(){
         Map<Id, Simploud__Controlled_Document__c> mapControlledDocs = TestUtils.mockMapControlledDocumentsForMetadataUpdate();
+        System.debug('mapControlledDocs>>> -  ' + mapControlledDocs);
         Map<Id,Simploud__Controlled_Document__c> mapControlledDocs2 = TestUtils.mockMapControlledDocumentsForMetadataUpdate();
         Test.startTest();
         MetadataUpdateQueuebale muqc = new MetadataUpdateQueuebale(mapControlledDocs, mapControlledDocs2);

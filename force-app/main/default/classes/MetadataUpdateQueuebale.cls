@@ -71,29 +71,29 @@ public with sharing class MetadataUpdateQueuebale implements Queueable, Database
                 getMetadata(cv);
                 getMetadataURI(cv);
                 getMetadataWithFields(cv);
-                fileCheckOut(cv);
-            
+               // fileCheckOut(cv);
                 if (docType == Constants.CONTROLLED_DOC_TYPE) {
                     metadataPOSTControlledDocument();
-                    fileCheckIn(cv);
+                    //fileCheckIn(cv);
                     if(cdObj.Simploud__Status__c == 'Effective'){
-                        String newTitle = cdObj.Name+' v'+Integer.valueof(cdObj.Record_Version__c)+' '+cdObj.Simploud__Status__c;
+                        String newTitle = cdObj.Name+' '+cdObj.Simploud__Status__c;
                         metadataRenameFile(newTitle);
                     }
                     if(cdObj.Simploud__Status__c == 'Obsolete'){
-                        String newTitle = cdObj.Name+' v'+Integer.valueof(cdObj.Record_Version__c)+' '+cdObj.Simploud__Status__c;
+                        String newTitle = cdObj.Name+' '+cdObj.Simploud__Status__c;
                         metadataRenameFile(newTitle);
                     }
                 } if (docType == Constants.GENERAL_DOC_TYPE) {
                     metadataPOSTGeneralDocument();
-                    fileCheckIn(cv);
+                    //fileCheckIn(cv);
                 }
                 if(cdObj.Simploud__Status__c == 'Effective'  && cv.FileExtension == 'pdf'){
-                    cv.Title = cdObj.Name+' v'+Integer.valueof(cdObj.Record_Version__c)+' '+cdObj.Simploud__Status__c;
+                    cv.Title = cdObj.Name+' '+cdObj.Simploud__Status__c;
                     update cv;
                 }
                 if(cdObj.Simploud__Status__c == 'Obsolete'  && cv.FileExtension == 'pdf'){
-                    cv.Title = cdObj.Name+' v'+Integer.valueof(cdObj.Record_Version__c)+' '+cdObj.Simploud__Status__c;
+                    cv.Title = cdObj.Name+' '+cdObj.Simploud__Status__c;
+                    // cv.Title = cdObj.Name+' v'+Integer.valueof(cdObj.Record_Version__c)+' '+cdObj.Simploud__Status__c;
                     update cv;
                 }
                 if(cv.FileExtension == 'pdf') {
@@ -105,7 +105,7 @@ public with sharing class MetadataUpdateQueuebale implements Queueable, Database
                             cv.ExternalDocumentInfo1 =metWrapper.sharePointUrl+'/'+sitePath+encodedFolderName+'/Forms/AllItems.aspx?id='+sitePath+encodedFolderName+'%2F'+encodedTitle+'.pdf&parent='+encodedFolderName;
                             update cv;
                         }else{
-                            String folderName = 'DrafttoDraftApprovalDocuments';
+                            String folderName = EncodingUtil.urlEncode(metWrapper.controlledDocsFolder,'UTF-8').replace('+','%20');
                             cv.ExternalDocumentInfo1 = metWrapper.sharePointUrl+metWrapper.sitePath+folderName+'/Forms/AllItems.aspx?viewpath='+EncodingUtil.urlEncode(metWrapper.sitePath,'UTF-8' )+folderName+'&id='+EncodingUtil.urlEncode(metWrapper.sitePath,'UTF-8' )+folderName+'%2F'+EncodingUtil.urlEncode(cv.Title,'UTF-8').replace('+','%20')+'.pdf&parent='+EncodingUtil.urlEncode(metWrapper.sitePath,'UTF-8' )+folderName;
                             update cv;
                         }
@@ -117,11 +117,11 @@ public with sharing class MetadataUpdateQueuebale implements Queueable, Database
                     update cv;
                 }
                 if(cdObj.Simploud__Status__c == 'Effective'  && cv.FileExtension != 'pdf'){
-                    cv.Title = cdObj.Name+' v'+Integer.valueof(cdObj.Record_Version__c)+' '+cdObj.Simploud__Status__c;
+                    cv.Title = cdObj.Name+' '+cdObj.Simploud__Status__c;
                     update cv;
                 }
                 if(cdObj.Simploud__Status__c == 'Obsolete'  && cv.FileExtension != 'pdf'){
-                    cv.Title = cdObj.Name+' v'+Integer.valueof(cdObj.Record_Version__c)+' '+cdObj.Simploud__Status__c;
+                    cv.Title = cdObj.Name+' '+cdObj.Simploud__Status__c;
                     update cv;
                 }
                 else
@@ -346,6 +346,7 @@ public with sharing class MetadataUpdateQueuebale implements Queueable, Database
         json+= +'}';
         Integer index=json.lastIndexOf(',');
         json=json.left(index)+json.right(json.length()-index-1);
+        System.debug('json>>> ' + json);
         return json;
 
     }
@@ -383,7 +384,7 @@ public with sharing class MetadataUpdateQueuebale implements Queueable, Database
 
     }
 
-    public void metadataPOSTLockedDocument() {
+  /*  public void metadataPOSTLockedDocument() {
         HttpRequest request = new HttpRequest();
         String relative = uri.substring(uri.lastIndexOf('.sharepoint.com') + 15).replace('"', '');
         String uri = EncodingUtil.urlEncode(relative, 'UTF-8');
@@ -397,7 +398,7 @@ public with sharing class MetadataUpdateQueuebale implements Queueable, Database
             getFieldsFromCustomMetadata());
         Http http = new Http();
         HttpResponse response = http.send(request);
-    }
+    }*/
 
     public void metadataRenameFile(String newTitle){
         HttpRequest request = new HttpRequest();

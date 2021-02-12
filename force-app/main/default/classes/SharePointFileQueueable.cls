@@ -262,7 +262,9 @@ public with sharing class SharePointFileQueueable implements Queueable,Database.
         json+= +'}';
         Integer index=json.lastIndexOf(',');
         json=json.left(index)+json.right(json.length()-index-1);
+        System.debug('json>>> ' + json);
         return json;
+       
 
     }
 
@@ -286,6 +288,7 @@ public with sharing class SharePointFileQueueable implements Queueable,Database.
         String relative = uri.substring(uri.lastIndexOf('.sharepoint.com')+15).replace('"','');
         String URI = EncodingUtil.urlEncode(relative,'UTF-8');
         request.setEndpoint('callout:'+metWrapper.authProvider+relative);
+        System.debug('url ->>>' + request);
         request.setMethod('POST');
         request.setHeader('Accept','application/json;odata=verbose');
         request.setHeader('Content-Type','application/json;odata=verbose');
@@ -294,8 +297,10 @@ public with sharing class SharePointFileQueueable implements Queueable,Database.
         request.setBody(
             getFieldsFromCustomMetadata()
             );
+            System.debug('fields>>>' + getFieldsFromCustomMetadata());
         Http http = new Http();
         HttpResponse response = http.send(request);
+        System.debug('response>>>' + response.getBody());
     }
 
 
@@ -332,7 +337,7 @@ public with sharing class SharePointFileQueueable implements Queueable,Database.
                 }else {
                     String sitePath = metWrapper.sitePath;
                     String encodedSitePath = EncodingUtil.urlEncode(metWrapper.sitePath,'UTF-8' );
-                    String folderName = 'DrafttoDraftApprovalDocuments';
+                    String folderName = EncodingUtil.urlEncode(metWrapper.controlledDocsFolder,'UTF-8').replace('+','%20');
                     String encodedUrl = EncodingUtil.urlEncode(externalFilePath,'UTF-8').replace('+','%20');
                     newExternalFile.ExternalDocumentInfo1 = sharePointURL+sitePath+folderName+'/Forms/AllItems.aspx'+'?viewpath='+encodedSitePath+'%2F'+folderName+'&id='+encodedUrl+'&parent='+encodedSitePath+'%2F'+folderName;
 

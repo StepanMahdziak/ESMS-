@@ -49,7 +49,3 @@ public with sharing class FileUploadToSPTriggerHelper {
     }
 
 }
-
-
-
-
